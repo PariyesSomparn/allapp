@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KARAOKE STUDIO</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;800&family=Prompt:wght@400;600;800&family=Sarabun:wght@400;700&display=swap">
+<style>
+:root{--bg:#16171b;--p1:#0e0f12;--p2:#1d1f25;--ln:#2b2e37;--tx:#e8e9ee;--mu:#8b90a0;--ac:#8b7cff;--cy:#4fd8f0;--rd:8px;--lw:330px;--rw:270px;--th:210px;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:13px/1.4 "Noto Sans Thai",system-ui,sans-serif;display:grid;grid-template-rows:48px minmax(0,1fr) var(--th);grid-template-columns:var(--lw) minmax(0,1fr) var(--rw);overflow:hidden}
+button,select,input,textarea{font:inherit;color:inherit}
+button{background:var(--p2);border:1px solid var(--ln);border-radius:6px;padding:5px 10px;cursor:pointer;transition:background .15s,border-color .15s}
+button:hover{border-color:var(--ac)}button:disabled{opacity:.4;cursor:default;border-color:var(--ln)}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--cy);outline-offset:1px}
+button.pri{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600}
+button.on{background:#2a2550;border-color:var(--ac)}
+input,select,textarea{background:var(--p1);border:1px solid var(--ln);border-radius:6px;padding:4px 7px;width:100%}
+input[type=range]{padding:0;accent-color:var(--ac)}input[type=color]{padding:0;height:26px;width:44px}
+header{grid-column:1/4;background:var(--p1);border-bottom:1px solid var(--ln);display:flex;align-items:center;gap:8px;padding:0 12px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.04em;margin-right:10px}
+.logo i{width:24px;height:24px;border-radius:7px;background:conic-gradient(from 200deg,var(--ac),var(--cy),var(--ac));display:grid;place-items:center}
+.logo i:after{content:"";width:8px;height:8px;border-radius:50%;background:var(--p1)}
+.logo small{display:block;font-weight:400;color:var(--mu);font-size:10px;letter-spacing:0}
+header .sp{flex:1}#pname{width:170px;background:transparent;border-color:transparent}#pname:hover{border-color:var(--ln)}
+aside,section.r{background:var(--p1);overflow:auto;display:flex;flex-direction:column}
+aside{border-right:1px solid var(--ln)}section.r{border-left:1px solid var(--ln);padding:12px;gap:10px}
+.tabs{display:flex;border-bottom:1px solid var(--ln);flex:none}
+.tabs button{flex:1;border:0;border-bottom:2px solid transparent;border-radius:0;background:none;padding:10px 4px;color:var(--mu)}
+.tabs button.on{color:var(--tx);border-bottom-color:var(--cy);background:none}
+.pane{display:none;padding:12px;gap:10px;flex-direction:column;overflow:auto;overflow-x:hidden;flex:1}.pane.on{display:flex}
+.drop{border:1.5px dashed var(--ln);border-radius:var(--rd);padding:18px;text-align:center;color:var(--mu)}.drop.hot{border-color:var(--cy);color:var(--tx)}
+.row{display:flex;gap:6px;align-items:center}.row>*{flex:1}.row>button{flex:none}
+label.f{display:grid;gap:3px;color:var(--mu);font-size:12px}
+h4{margin:6px 0 0;font-size:12px;color:var(--mu);font-weight:600}
+main{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;background:var(--bg)}
+.stage{flex:1;position:relative;overflow:hidden;min-height:0}
+canvas#pv{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:640px;height:360px;border-radius:6px;background:#000;box-shadow:0 0 0 1px var(--ln)}canvas#pv:fullscreen{position:fixed;left:0;top:0;transform:none;width:100%!important;height:100%!important;object-fit:contain;border-radius:0}
+.tr{display:flex;align-items:center;gap:8px;padding:8px 14px;border-top:1px solid var(--ln);background:var(--p1)}
+.tr .tc{font-variant-numeric:tabular-nums;color:var(--cy);min-width:110px}.tr input[type=range]{flex:1}
+.tl{grid-column:1/4;background:var(--p1);border-top:1px solid var(--ln);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.tl .bar{display:flex;gap:6px;align-items:center;padding:6px 12px;border-bottom:1px solid var(--ln);flex-wrap:wrap}
+.tlw{position:relative;flex:1;min-height:0}canvas#tc{width:100%;height:100%;display:block;cursor:pointer}
+.line{background:var(--p2);border:1px solid var(--ln);border-radius:var(--rd);padding:8px;display:grid;gap:5px}
+.line.sel{border-color:var(--ac)}.line.cur{box-shadow:inset 3px 0 var(--cy)}
+.line .t{display:grid;grid-template-columns:1fr 1fr auto auto;gap:5px;align-items:center}
+.sw{position:relative;width:36px;height:20px;flex:none}.sw input{opacity:0;position:absolute;inset:0;z-index:2;cursor:pointer;width:100%;height:100%}
+.sw span{position:absolute;inset:0;background:#33364a;border-radius:20px;transition:.15s}
+.sw span:after{content:"";position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.15s}
+.sw input:checked+span{background:var(--ac)}.sw input:checked+span:after{left:18px}
+.badge{font-size:11px;padding:1px 6px;border-radius:10px;background:#242739;color:var(--mu)}
+.ok{color:#5fd39a}.no{color:#f0b35a}
+#toast{position:fixed;bottom:calc(var(--th) + 20px);left:50%;transform:translateX(-50%);background:#2a2550;border:1px solid var(--ac);padding:8px 14px;border-radius:8px;display:none;z-index:9}
+ul.st{list-style:none;margin:0;padding:0;display:grid;gap:6px}ul.st li{background:var(--p2);border-radius:6px;padding:7px 9px}
+.gh{position:fixed;z-index:20;background:rgba(139,144,160,.16);transition:background .15s}.gh:hover,.gh.on{background:var(--cy)}
+.gl,.gr{top:48px;bottom:var(--th);width:8px;cursor:col-resize}.gl{left:calc(var(--lw) - 4px)}.gr{right:calc(var(--rw) - 4px)}
+.gb{left:0;right:0;bottom:calc(var(--th) - 4px);height:8px;cursor:row-resize}
+@media(max-width:900px){.gh{display:none}body{grid-template-columns:1fr;grid-template-rows:48px auto auto auto;overflow:auto;height:auto}header,.tl{grid-column:1}aside,section.r{max-height:none}.tl{height:200px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<header>
+ <div class="logo"><i></i><div>KARAOKE STUDIO<small>Karaoke Video Creator</small></div></div>
+ <input id="pname" value="โปรเจกต์ใหม่" aria-label="ชื่อโปรเจกต์">
+ <button id="bNew">โปรเจกต์ใหม่</button><button id="bOpen">เปิด</button><button id="bSave" title="Ctrl+S">บันทึก</button><button id="bUn" title="ย้อนกลับ (Ctrl+Z)" disabled>↶ ย้อนกลับ</button><button id="bRe" title="ทำซ้ำ (Ctrl+Shift+Z)" disabled>↷ ทำซ้ำ</button>
+ <input type="file" id="fOpen" accept=".json" hidden>
+ <span class="sp"></span>
+ <button id="bExp" class="pri">ส่งออกวิดีโอ</button>
+</header>
+
+<aside>
+ <div class="tabs"><button class="on" data-t="media">สื่อ</button><button data-t="lyr">เนื้อเพลง</button><button data-t="bg">พื้นหลัง</button><button data-t="st">คู่มือ</button></div>
+ <div class="pane on" id="p-media">
+  <div class="drop" id="drop">ลากไฟล์เพลงหรือวิดีโอมาวางที่นี่<br><small>MP3 WAV M4A FLAC OGG MP4 WEBM</small><br><br><button id="bAud" class="pri">เลือกไฟล์เพลง</button><input type="file" id="fAud" accept="audio/*,video/*" hidden></div>
+  <div id="minfo" style="color:var(--mu)">ยังไม่มีไฟล์ นำเข้าเพลงเพื่อเริ่มต้น</div>
+  <p style="color:var(--mu);font-size:12px;margin:0">ผู้ใช้ต้องมีสิทธิ์ใช้งานเพลง เนื้อเพลง และภาพพื้นหลังที่นำเข้า</p>
+ </div>
+ <div class="pane" id="p-lyr">
+  <label class="f">วางเนื้อเพลง ธรรมดา หรือแบบมีเวลา<textarea id="lyrIn" rows="7" placeholder="[00:15] กาลครั้งนึง หนังสือเล่มหนึ่ง&#10;[00:20] บทหนึ่งบทในนั้นมีผู้ประพันธ์&#10;หรือไม่ใส่เวลาก็ได้ บรรทัดละหนึ่งท่อน"></textarea></label>
+  <div class="row" style="flex-wrap:wrap"><button id="bLrc" class="pri">วางตามเวลา [mm:ss]</button><button id="bTxt">เปิดไฟล์ .txt</button><input type="file" id="fTxt" accept=".txt,.lrc,text/plain" hidden><button id="bMk">สร้างบรรทัดไม่มีเวลา</button><button id="bClr" style="color:#ff8a8a">ล้างเนื้อเพลงทั้งหมด</button><button id="bTap">Tap-to-Sync</button><button id="bUndoTap" title="ย้อนจุดล่าสุด">ย้อน</button></div>
+  <div id="tapHint" style="color:var(--cy);display:none">กด Space ตอนที่บรรทัดที่ไฮไลต์เริ่มร้อง</div>
+  <div class="row" style="align-items:center"><span>Phonetic Lyrics</span><label class="sw" style="flex:none"><input type="checkbox" id="phOn"><span></span></label><span class="badge" id="phLab">OFF</span></div>
+  <div class="row" style="flex-wrap:wrap"><button id="bNudge" data-d="-0.5">-0.5</button><button data-d="-0.1" class="nd">-0.1</button><button data-d="-0.05" class="nd">-0.05</button><button data-d="0.05" class="nd">+0.05</button><button data-d="0.1" class="nd">+0.1</button><button data-d="0.5" class="nd">+0.5</button></div>
+  <div id="lines" style="display:grid;gap:8px"><div style="color:var(--mu)">ยังไม่มีเนื้อเพลง วางข้อความแล้วกด “สร้างบรรทัด”</div></div>
+ </div>
+ <div class="pane" id="p-bg">
+  <div class="row"><button id="bBgI">รูปภาพ</button><button id="bBgV">วิดีโอ</button><button id="bBgN">ล้าง</button></div>
+  <input type="file" id="fBgI" accept="image/*" hidden><input type="file" id="fBgV" accept="video/*" hidden>
+  <h4>ไล่สี</h4><div class="row" id="grads"></div>
+  <h4>ความมืดของพื้นหลัง</h4><input type="range" id="dim" min="0" max="0.9" step="0.05" value="0.35">
+  <h4>ซูม</h4><input type="range" id="zoom" min="1" max="2" step="0.01" value="1">
+ </div>
+ <div class="pane" id="p-st">
+  <ul class="st">
+   <li><b class="ok">ขั้นตอน</b> 1) นำเข้าเพลงที่แท็บ “สื่อ” 2) วางเนื้อเพลงที่แท็บ “เนื้อเพลง” (แบบมีเวลา [mm:ss] หรือไม่มีเวลาแล้วใช้ Tap-to-Sync) 3) เลือกพื้นหลังและสไตล์ 4) พรีวิว 5) ส่งออกวิดีโอ</li>
+   <li><b class="ok">คีย์ลัด</b> Space เล่น/หยุด · Ctrl+Z ย้อนกลับ · Ctrl+Shift+Z ทำซ้ำ · Ctrl+S บันทึก · F เต็มจอ · ลูกศร เลื่อนตำแหน่ง</li>
+   <li><b class="no">หมายเหตุ</b> ส่งออกเป็นไฟล์ WebM โดยบันทึกจากพรีวิวแบบเรียลไทม์ (ใช้ Chrome, Edge หรือ Firefox) ไฟล์โปรเจกต์ไม่รวมไฟล์เพลงและพื้นหลัง ต้องนำเข้าใหม่ทุกครั้ง ผู้ใช้ต้องมีสิทธิ์ใช้งานสื่อที่นำเข้า</li>
+  </ul>
+ </div>
+</aside>
+
+<main>
+ <div class="stage"><canvas id="pv" width="1280" height="720"></canvas></div>
+ <div class="tr">
+  <button id="bPlay" class="pri" style="width:70px">เล่น</button><button id="bStop">หยุด</button>
+  <span class="tc" id="tcode">00:00.00 / 00:00.00</span>
+  <input type="range" id="seek" min="0" max="1000" value="0" aria-label="ตำแหน่ง">
+  <select id="asp" style="width:80px"><option value="1280x720">16:9</option><option value="720x1280">9:16</option><option value="1000x1000">1:1</option><option value="960x720">4:3</option></select>
+  <button id="bSafe">Safe zone</button>
+  <button id="bFs" title="F">เต็มจอ</button>
+ </div>
+</main>
+
+<section class="r">
+ <h4>สไตล์เนื้อเพลง</h4>
+ <div class="row" id="presets" style="flex-wrap:wrap"></div>
+ <label class="f">โหมดไฮไลต์<select id="mode"><option value="fill">Progressive Fill</option><option value="line">Line Highlight</option></select></label>
+ <label class="f" style="display:flex;justify-content:space-between"><span>ความเร็วไฮไลต์ (ตัวหนังสือวิ่ง)</span><b id="fsv" style="color:var(--cy)">1.0x</b></label><input type="range" id="fillSpd" min="0.5" max="3" step="0.1" value="1" title="1.0x = วิ่งจบพอดีเวลาจบบรรทัด · มากกว่า 1 = วิ่งเร็วกว่า">
+ <label class="f">ฟอนต์<select id="font"><option>Noto Sans Thai</option><option>Prompt</option><option>Sarabun</option><option>Georgia</option></select></label>
+ <label class="f">ขนาด<input type="range" id="size" min="30" max="120" value="68"></label>
+ <label class="f">ตำแหน่งแนวตั้ง<input type="range" id="ypos" min="20" max="90" value="72"></label>
+ <div class="row"><label class="f">สีตัวอักษร<input type="color" id="c1" value="#ffffff"></label><label class="f">สีไฮไลต์<input type="color" id="c2" value="#4fd8f0"></label></div>
+ <label class="f">ขอบตัวอักษร<input type="range" id="outl" min="0" max="14" value="6"></label>
+ <label class="f">Glow<input type="range" id="glow" min="0" max="40" value="0"></label>
+ <label class="f" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="nxt" style="width:auto" checked>แสดงบรรทัดถัดไป</label>
+ <h4>Phonetic</h4>
+ <label class="f">ขนาดเทียบกับต้นฉบับ<input type="range" id="phS" min="0.4" max="1" step="0.05" value="0.65"></label>
+ <div class="row"><label class="f">สี Phonetic<input type="color" id="c3" value="#d6d6d6"></label><label class="f">ไฮไลต์<input type="color" id="c4" value="#55d6ff"></label></div>
+</section>
+
+<div class="tl">
+ <div class="bar"><button id="bRl" title="คืนขนาดแผงทั้งหมด">รีเซ็ตเลย์เอาต์</button><button id="bSplit">แยกบรรทัดที่เล่นอยู่</button><button id="bDel">ลบบรรทัดที่เลือก</button><span style="color:var(--mu)">คลิกไทม์ไลน์เพื่อเลื่อนตำแหน่ง · Space เล่น/หยุด · ลากขอบบล็อกเพื่อปรับเวลา</span></div>
+ <div class="tlw"><canvas id="tc"></canvas></div>
+</div>
+<div class="gh gl" data-k="lw" title="ลากเพื่อปรับขนาด · ดับเบิลคลิกเพื่อรีเซ็ต"></div><div class="gh gr" data-k="rw" title="ลากเพื่อปรับขนาด · ดับเบิลคลิกเพื่อรีเซ็ต"></div><div class="gh gb" data-k="th" title="ลากเพื่อปรับขนาด · ดับเบิลคลิกเพื่อรีเซ็ต"></div>
+<div id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s),au=document.createElement("audio");au.preload="auto";
+const S={lines:[],sel:-1,peaks:null,phOn:false,safe:false,tap:-1,bgT:"grad",bgEl:null,grad:0,name:"",
+ st:{mode:"fill",font:"Noto Sans Thai",size:68,y:72,c1:"#ffffff",c2:"#4fd8f0",outl:6,glow:0,nxt:true,phS:.65,c3:"#d6d6d6",c4:"#55d6ff",dim:.35,zoom:1,fillSpd:1}};
+const GR=[["#241a4a","#0b2a3a"],["#3a1030","#101030"],["#0d1b2a","#1b4a5a"],["#2b1a0e","#0e0e12"]];
+const PRE={Classic:{c1:"#ffffff",c2:"#ffe14f",outl:7,glow:0},Neon:{c1:"#e9d9ff",c2:"#4fd8f0",outl:3,glow:28},Cinematic:{c1:"#f2efe8",c2:"#ffb86b",outl:4,glow:6,font:"Georgia"},Minimal:{c1:"#ffffff",c2:"#8b7cff",outl:0,glow:0},"Thai":{c1:"#ffffff",c2:"#ff5fa2",outl:8,glow:0,font:"Prompt"}};
+const toast=(m,u)=>{const t=$("#toast");t.textContent=m;if(u){const b=document.createElement("button");b.textContent="ย้อนกลับ";b.style.marginLeft="10px";b.onclick=()=>undoDo();t.append(b)}t.style.display="block";clearTimeout(t._h);t._h=setTimeout(()=>t.style.display="none",u?7000:3200)};
+const H={u:[],r:[],cur:null,t:0};
+const st=()=>JSON.stringify({l:S.lines,p:S.phOn});
+const snap=()=>{H.t=0};
+function updBtn(){const a=$("#bUn"),b=$("#bRe");if(a){a.disabled=!H.u.length;b.disabled=!H.r.length}}
+function commit(){const n=st();if(H.cur===null){H.cur=n;return}if(n===H.cur)return;const now=Date.now();if(now-H.t>700||!H.u.length){H.u.push(H.cur);if(H.u.length>100)H.u.shift()}H.cur=n;H.t=now;H.r=[];updBtn()}
+function applySt(s){const p=JSON.parse(s);S.lines=p.l;S.phOn=p.p;S.sel=-1;tapOn(-1);syncCtl();renderLines();try{localStorage.setItem("ksai",proj())}catch(e){}H.cur=s;H.t=0;updBtn()}
+function redoDo(){if(!H.r.length)return toast("ไม่มีอะไรให้ทำซ้ำ");H.u.push(H.cur);applySt(H.r.pop());toast("ทำซ้ำแล้ว")}
+function undoDo(){if(!H.u.length)return toast("ไม่มีอะไรให้ย้อนกลับ");H.r.push(H.cur);applySt(H.u.pop());toast("ย้อนกลับแล้ว")}
+const fmt=t=>{t=Math.max(0,t||0);return String(Math.floor(t/60)).padStart(2,"0")+":"+(t%60).toFixed(2).padStart(5,"0")};
+const dur=()=>isFinite(au.duration)?au.duration:0;
+const lend=i=>{const l=S.lines[i];if(l.e!=null)return l.e;const n=S.lines.slice(i+1).find(x=>x.s!=null);return n?n.s:(l.s+4)};
+
+/* tabs */
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tabs button,.pane").forEach(x=>x.classList.remove("on"));b.classList.add("on");$("#p-"+b.dataset.t).classList.add("on")});
+
+/* media */
+async function loadFile(f){
+ if(!f)return;
+ if(!/^(audio|video)\//.test(f.type)&&!/\.(mp3|wav|m4a|aac|flac|ogg|mp4|mov|webm|mkv)$/i.test(f.name)){toast("ไม่รองรับไฟล์นี้: "+f.name);return}
+ au.src=URL.createObjectURL(f);S.peaks=null;
+ $("#minfo").innerHTML="กำลังอ่านไฟล์: "+f.name+" ("+(f.size/1048576).toFixed(1)+" MB)";
+ try{
+  const ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const buf=await ctx.decodeAudioData(await f.arrayBuffer());ctx.close();
+  const d=buf.getChannelData(0),N=2400,step=Math.floor(d.length/N)||1,p=new Float32Array(N);
+  for(let i=0;i<N;i++){let m=0;for(let j=0;j<step;j+=Math.max(1,step>>5)){const v=Math.abs(d[i*step+j]||0);if(v>m)m=v}p[i]=m}
+  S.peaks=p;
+  $("#minfo").innerHTML="<b>"+f.name+"</b><br>ความยาว "+fmt(buf.duration)+" · "+buf.sampleRate+" Hz · "+buf.numberOfChannels+" ช่อง · "+(f.size/1048576).toFixed(1)+" MB"+(f.type.startsWith("video")?"<br>ดึงเสียงจากวิดีโอแล้ว":"");
+  if(f.type.startsWith("video")&&!S.bgEl){useVideoBg(au.src,true)}
+ }catch(e){$("#minfo").textContent="อ่านคลื่นเสียงไม่สำเร็จ ("+e.message+") ยังเล่นเสียงได้ถ้าเบราว์เซอร์รองรับ";toast("สร้างคลื่นเสียงไม่ได้")}
+}
+$("#bAud").onclick=()=>$("#fAud").click();$("#fAud").onchange=e=>loadFile(e.target.files[0]);
+const dz=$("#drop");["dragover","dragenter"].forEach(n=>dz.addEventListener(n,e=>{e.preventDefault();dz.classList.add("hot")}));
+["dragleave","drop"].forEach(n=>dz.addEventListener(n,e=>{e.preventDefault();dz.classList.remove("hot")}));
+dz.addEventListener("drop",e=>loadFile(e.dataTransfer.files[0]));
+
+/* background */
+function useVideoBg(url,mute){const v=document.createElement("video");v.src=url;v.muted=true;v.loop=true;v.playsInline=true;S.bgEl=v;S.bgT="video";if(!au.paused)v.play().catch(()=>{})}
+$("#bBgI").onclick=()=>$("#fBgI").click();$("#bBgV").onclick=()=>$("#fBgV").click();
+$("#fBgI").onchange=e=>{const f=e.target.files[0];if(!f)return;const i=new Image();i.onload=()=>{S.bgEl=i;S.bgT="img"};i.onerror=()=>toast("เปิดรูปไม่ได้");i.src=URL.createObjectURL(f)};
+$("#fBgV").onchange=e=>{const f=e.target.files[0];if(f)useVideoBg(URL.createObjectURL(f))};
+$("#bBgN").onclick=()=>{S.bgEl=null;S.bgT="grad"};
+GR.forEach((g,i)=>{const b=document.createElement("button");b.style.cssText=`height:34px;background:linear-gradient(135deg,${g[0]},${g[1]})`;b.onclick=()=>{S.grad=i;S.bgT="grad";S.bgEl=null};b.setAttribute("aria-label","ไล่สี "+(i+1));$("#grads").append(b)});
+
+/* lyrics */
+function renderLines(){
+ const box=$("#lines");box.innerHTML="";
+ if(!S.lines.length){box.innerHTML='<div style="color:var(--mu)">ยังไม่มีเนื้อเพลง วางข้อความแล้วกด “สร้างบรรทัด”</div>';return}
+ S.lines.forEach((l,i)=>{
+  const d=document.createElement("div");d.className="line"+(i==S.sel?" sel":"");d.dataset.i=i;
+  d.innerHTML=`<input class="o" value="" aria-label="ต้นฉบับ"><input class="p" placeholder="Phonetic (พิมพ์เอง)" aria-label="Phonetic">
+  <div class="t"><input type="number" step="0.05" class="s" placeholder="เริ่ม"><input type="number" step="0.05" class="e" placeholder="จบ"><label class="sw" title="แสดง Phonetic บรรทัดนี้"><input type="checkbox" class="sp"><span></span></label><button class="dl" title="ลบบรรทัดนี้" aria-label="ลบบรรทัดนี้" style="padding:3px 8px">✕</button></div>
+  <div class="row"><span style="flex:none;color:var(--mu);font-size:12px">ความเร็วไฮไลต์</span><input type="number" class="v" step="0.1" min="0.3" max="5" placeholder="ตามค่ารวม" aria-label="ความเร็วไฮไลต์รายบรรทัด"><button class="vr" title="กลับไปใช้ค่ารวม">รีเซ็ต</button></div>`;
+  const q=s=>d.querySelector(s);q(".o").value=l.t;q(".p").value=l.p||"";q(".s").value=l.s!=null?l.s.toFixed(2):"";q(".e").value=l.e!=null?l.e.toFixed(2):"";q(".sp").checked=l.sp!==false;
+  q(".o").oninput=e=>{l.t=e.target.value;save()};q(".p").oninput=e=>{l.p=e.target.value;save()};
+  q(".s").onchange=e=>{l.s=e.target.value===""?null:+e.target.value;save()};q(".e").onchange=e=>{l.e=e.target.value===""?null:+e.target.value;save()};
+  q(".sp").onchange=e=>{l.sp=e.target.checked;save()};
+  q(".v").value=l.v!=null?l.v:"";q(".v").onchange=e=>{const x=e.target.value===""?null:Math.min(5,Math.max(.3,+e.target.value));l.v=x;e.target.value=x==null?"":x;save()};q(".vr").onclick=ev=>{ev.stopPropagation();l.v=null;q(".v").value="";save()};
+  q(".dl").onclick=ev=>{ev.stopPropagation();snap();S.lines.splice(i,1);S.sel=-1;renderLines();save();toast("ลบบรรทัดแล้ว",1)};
+  d.onclick=e=>{S.sel=i;document.querySelectorAll(".line").forEach(x=>x.classList.toggle("sel",x.dataset.i==i));if(e.target.tagName!=="INPUT"&&l.s!=null)au.currentTime=l.s};
+  box.append(d)});
+}
+$("#bMk").onclick=()=>{
+ if(/\[\d{1,3}:\d{1,2}/.test($("#lyrIn").value))return $("#bLrc").click();
+ const arr=$("#lyrIn").value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+ if(!arr.length){toast("วางเนื้อเพลงก่อน");return}
+ S.lines=arr.map(t=>({t,p:"",s:null,e:null,sp:true}));S.sel=-1;renderLines();save();toast("สร้าง "+arr.length+" บรรทัด ใช้ Tap-to-Sync เพื่อใส่เวลา")};
+/* timed lyrics import: [mm:ss] or [mm:ss.xx] text */
+function parseTimed(txt){
+ const out=[];let skip=0;
+ for(const raw of txt.split(/\r?\n/)){
+  const line=raw.trim();if(!line)continue;
+  const m=[...line.matchAll(/\[(\d{1,3}):(\d{1,2})(?:[.:](\d{1,3}))?\]/g)];
+  if(!m.length){if(!/^\[[a-z]+:/i.test(line))skip++;continue}
+  const text=line.replace(/\[[^\]]*\]/g,"").trim();
+  if(!text){skip++;continue}
+  m.forEach(x=>out.push({t:text,p:"",s:+x[1]*60+ +x[2]+(x[3]?+("0."+x[3]):0),e:null,sp:true}));
+ }
+ out.sort((a,b)=>a.s-b.s);
+ out.forEach((l,i)=>{const n=out[i+1];l.e=n?Math.min(n.s,l.s+8):l.s+4});
+ return{out,skip}}
+$("#bLrc").onclick=()=>{
+ const {out,skip}=parseTimed($("#lyrIn").value);
+ if(!out.length)return toast("ไม่พบเวลาในรูปแบบ [00:15] ข้อความ");
+ snap();
+ S.lines=out;S.sel=-1;tapOn(-1);renderLines();save();
+ let msg="วางเนื้อเพลง "+out.length+" บรรทัด ช่วง "+fmt(out[0].s).slice(0,5)+" ถึง "+fmt(out[out.length-1].s).slice(0,5);
+ if(skip)msg+=" (ข้าม "+skip+" บรรทัดที่ไม่มีเวลา)";
+ if(dur()&&out[out.length-1].s>dur())msg+=" · มีบรรทัดเกินความยาวเพลง";
+ toast(msg,1)};
+$("#bTxt").onclick=()=>$("#fTxt").click();
+$("#fTxt").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{$("#lyrIn").value=await f.text();e.target.value="";
+ if(/\[\d{1,3}:\d{1,2}/.test($("#lyrIn").value))$("#bLrc").click();else toast("โหลดข้อความแล้ว กด สร้างบรรทัดไม่มีเวลา")}catch(x){toast("อ่านไฟล์ไม่ได้")}};
+$("#phOn").onchange=e=>{S.phOn=e.target.checked;$("#phLab").textContent=S.phOn?"ON":"OFF";save()};
+document.querySelectorAll(".nd,#bNudge").forEach(b=>b.onclick=()=>{
+ const d=+b.dataset.d,l=S.lines[S.sel];if(!l||l.s==null){toast("เลือกบรรทัดที่มีเวลาก่อน");return}
+ l.s=Math.max(0,l.s+d);if(l.e!=null)l.e=Math.max(l.s,l.e+d);renderLines();save()});
+$("#bClr").onclick=()=>{if(!S.lines.length&&!$("#lyrIn").value)return toast("ยังไม่มีเนื้อเพลงให้ลบ");
+ snap();S.lines=[];S.sel=-1;tapOn(-1);$("#lyrIn").value="";renderLines();save();toast("ลบเนื้อเพลงทั้งหมดแล้ว",1)};
+$("#bDel").onclick=()=>{if(S.sel<0)return toast("เลือกบรรทัดก่อน");snap();S.lines.splice(S.sel,1);S.sel=-1;renderLines();save();toast("ลบบรรทัดแล้ว",1)};
+$("#bSplit").onclick=()=>{const t=au.currentTime,i=S.lines.findIndex((l,k)=>l.s!=null&&t>l.s&&t<lend(k));
+ if(i<0)return toast("เลื่อนหัวเล่นไปอยู่กลางบรรทัดก่อน");
+ const l=S.lines[i],e=lend(i),w=[...l.t],cut=Math.round(w.length/2);
+ S.lines.splice(i,1,{...l,t:w.slice(0,cut).join("").trim(),e:t},{t:w.slice(cut).join("").trim(),p:"",s:t,e:e,sp:true});renderLines();save()};
+
+/* tap to sync */
+function tapOn(i){S.tap=i;$("#tapHint").style.display=i>=0?"block":"none";$("#bTap").classList.toggle("on",i>=0);
+ document.querySelectorAll(".line").forEach(x=>x.classList.toggle("cur",+x.dataset.i===i))}
+$("#bTap").onclick=()=>{if(!S.lines.length)return toast("สร้างบรรทัดก่อน");if(!au.src)return toast("นำเข้าเพลงก่อน");
+ if(S.tap>=0){tapOn(-1);return}tapOn(0);if(au.paused)au.play()};
+$("#bUndoTap").onclick=()=>{if(S.tap>0){S.tap--;S.lines[S.tap].s=null;S.lines[S.tap].e=null;if(S.tap>0)S.lines[S.tap-1].e=null;tapOn(S.tap);renderLines();tapOn(S.tap)}};
+function doTap(){const t=au.currentTime,i=S.tap,L=S.lines;L[i].s=t;if(i>0)L[i-1].e=t;
+ if(i+1>=L.length){L[i].e=Math.min(t+4,dur()||t+4);tapOn(-1);toast("ซิงค์ครบทุกบรรทัด")}else tapOn(i+1);
+ const r=document.querySelectorAll(".line")[i];if(r){r.querySelector(".s").value=t.toFixed(2);if(i>0)document.querySelectorAll(".line")[i-1].querySelector(".e").value=t.toFixed(2)};save()}
+
+/* style controls */
+const bind=(id,k,num)=>{const el=$("#"+id);const f=()=>{S.st[k]=el.type==="checkbox"?el.checked:(num?+el.value:el.value);save()};el.oninput=f};
+[["mode","mode"],["font","font"],["size","size",1],["ypos","y",1],["c1","c1"],["c2","c2"],["outl","outl",1],["glow","glow",1],["nxt","nxt"],["phS","phS",1],["c3","c3"],["c4","c4"],["dim","dim",1],["zoom","zoom",1],["fillSpd","fillSpd",1]].forEach(a=>bind(...a));
+$("#fillSpd").addEventListener("input",e=>$("#fsv").textContent=(+e.target.value).toFixed(1)+"x");
+Object.keys(PRE).forEach(n=>{const b=document.createElement("button");b.textContent=n;b.onclick=()=>{Object.assign(S.st,PRE[n]);syncCtl();save()};$("#presets").append(b)});
+function syncCtl(){const m={mode:"mode",font:"font",size:"size",y:"ypos",c1:"c1",c2:"c2",outl:"outl",glow:"glow",nxt:"nxt",phS:"phS",c3:"c3",c4:"c4",dim:"dim",zoom:"zoom",fillSpd:"fillSpd"};
+ for(const k in m){const el=$("#"+m[k]);if(el.type==="checkbox")el.checked=S.st[k];else el.value=S.st[k]}$("#phOn").checked=S.phOn;$("#fsv").textContent=(+S.st.fillSpd||1).toFixed(1)+"x";$("#phLab").textContent=S.phOn?"ON":"OFF"}
+
+/* transport */
+$("#bPlay").onclick=()=>{if(!au.src)return toast("นำเข้าเพลงก่อน");au.paused?au.play():au.pause()};
+$("#bStop").onclick=()=>{au.pause();au.currentTime=0;tapOn(-1)};
+au.onplay=()=>{$("#bPlay").textContent="หยุดชั่วคราว";S.bgT==="video"&&S.bgEl.play().catch(()=>{})};
+au.onpause=()=>{$("#bPlay").textContent="เล่น";S.bgEl&&S.bgEl.pause&&S.bgEl.pause()};
+au.onerror=()=>toast("เล่นไฟล์เสียงนี้ไม่ได้");
+$("#seek").oninput=e=>{if(dur())au.currentTime=e.target.value/1000*dur()};
+$("#asp").onchange=e=>{const[w,h]=e.target.value.split("x");pv.width=+w;pv.height=+h;fitPv()};
+$("#bSafe").onclick=()=>{S.safe=!S.safe;$("#bSafe").classList.toggle("on",S.safe)};
+$("#bFs").onclick=()=>pv.requestFullscreen&&pv.requestFullscreen();
+
+/* render */
+const pv=$("#pv"),cx=pv.getContext("2d");
+function drawBg(){const W=pv.width,H=pv.height,s=S.st;
+ if(S.bgEl&&(S.bgT==="img"||S.bgT==="video")){const e=S.bgEl,w=e.videoWidth||e.naturalWidth,h=e.videoHeight||e.naturalHeight;
+  if(w){const k=Math.max(W/w,H/h)*s.zoom;cx.drawImage(e,(W-w*k)/2,(H-h*k)/2,w*k,h*k)}}
+ else{const g=cx.createLinearGradient(0,0,W,H),c=GR[S.grad];g.addColorStop(0,c[0]);g.addColorStop(1,c[1]);cx.fillStyle=g;cx.fillRect(0,0,W,H)}
+ cx.fillStyle="rgba(0,0,0,"+s.dim+")";cx.fillRect(0,0,W,H)}
+function txt(t,y,size,base,act,frac,alpha){
+ const s=S.st,W=pv.width;cx.save();cx.globalAlpha=alpha;cx.font=`700 ${size}px "${s.font}",sans-serif`;cx.textBaseline="middle";cx.textAlign="left";cx.lineJoin="round";
+ let sz=size;let w=cx.measureText(t).width;const max=W*.88;if(w>max){sz=size*max/w;cx.font=`700 ${sz}px "${s.font}",sans-serif`;w=max}
+ const x=(W-w)/2;
+ if(s.outl>0){cx.lineWidth=s.outl*sz/68;cx.strokeStyle="rgba(0,0,0,.9)";cx.strokeText(t,x,y)}
+ cx.shadowColor=act;cx.shadowBlur=frac>0?s.glow:0;
+ cx.fillStyle=base;cx.fillText(t,x,y);
+ if(frac>0){cx.save();cx.beginPath();cx.rect(x-4,y-sz,w*frac+4,sz*2);cx.clip();cx.fillStyle=act;cx.fillText(t,x,y);cx.restore()}
+ cx.restore()}
+function group(i,y,size,frac,alpha,cur){const l=S.lines[i],s=S.st;txt(l.t,y,size,s.c1,s.c2,frac,alpha);
+ if(S.phOn&&l.sp!==false&&l.p){const ps=size*s.phS;txt(l.p,y+size*.78,ps,s.c3,s.c4,frac,alpha)}}
+function frame(){
+ const W=pv.width,H=pv.height,s=S.st,t=au.currentTime;
+ cx.clearRect(0,0,W,H);drawBg();
+ const sc=H/720,size=s.size*sc;let ci=-1;
+ for(let i=0;i<S.lines.length;i++){const l=S.lines[i];if(l.s!=null&&t>=l.s&&t<lend(i)){ci=i;break}}
+ if(ci>=0){const l=S.lines[ci],e=lend(ci),fr=s.mode==="fill"?Math.min(1,(t-l.s)*(l.v>0?l.v:(s.fillSpd||1))/Math.max(.05,e-l.s)):1;
+  const y=H*s.y/100;group(ci,y,size,fr,1);
+  if(s.nxt&&ci+1<S.lines.length)group(ci+1,y+size*(S.phOn?2.5:1.5),size*.7,0,.55)}
+ else if(!S.lines.length){cx.fillStyle="rgba(255,255,255,.55)";cx.font=`${28*sc}px "Noto Sans Thai"`;cx.textAlign="center";cx.fillText(au.src?"วางเนื้อเพลงที่แท็บ เนื้อเพลง":"นำเข้าเพลงเพื่อเริ่มต้น",W/2,H/2)}
+ if(S.safe){cx.strokeStyle="rgba(79,216,240,.7)";cx.setLineDash([8,6]);cx.lineWidth=2;cx.strokeRect(W*.05,H*.05,W*.9,H*.9);cx.strokeRect(W*.1,H*.1,W*.8,H*.8);cx.setLineDash([])}
+ $("#tcode").textContent=fmt(t)+" / "+fmt(dur());
+ if(dur()&&document.activeElement!==$("#seek"))$("#seek").value=t/dur()*1000;
+ drawTl(t)}
+/* timeline */
+const tcv=$("#tc"),tx=tcv.getContext("2d");let drag=null;
+function drawTl(t){
+ const r=tcv.getBoundingClientRect(),dp=devicePixelRatio||1;if(tcv.width!==Math.round(r.width*dp)){tcv.width=Math.round(r.width*dp);tcv.height=Math.round(r.height*dp)}
+ const W=tcv.width,H=tcv.height;tx.setTransform(dp,0,0,dp,0,0);const w=W/dp,h=H/dp,D=dur()||60;tx.clearRect(0,0,w,h);
+ tx.fillStyle="#8b90a0";tx.font="10px sans-serif";tx.fillStyle="#13141a";tx.fillRect(0,0,w,18);
+ const stp=D>240?30:D>90?10:5;for(let k=0;k<=D;k+=stp){const x=k/D*w;tx.fillStyle="#2b2e37";tx.fillRect(x,0,1,h);tx.fillStyle="#8b90a0";tx.fillText(fmt(k).slice(0,5),x+3,12)}
+ const ly=24,lh=36;tx.fillStyle="#181a21";tx.fillRect(0,ly,w,lh);
+ S.lines.forEach((l,i)=>{if(l.s==null)return;const x=l.s/D*w,e=lend(i)/D*w;tx.fillStyle=i===S.sel?"#8b7cff":"#4b4390";tx.fillRect(x,ly+3,Math.max(2,e-x-1),lh-6);
+  tx.fillStyle="#fff";tx.save();tx.beginPath();tx.rect(x,ly,Math.max(0,e-x-2),lh);tx.clip();tx.fillText(l.t,x+4,ly+22);tx.restore()});
+ const wy=ly+lh+6,wh=h-wy-4,mid=wy+wh/2;
+ if(S.peaks){tx.fillStyle="#4fd8f0";const n=S.peaks.length;for(let x=0;x<w;x++){const v=S.peaks[Math.floor(x/w*n)]*wh/2;tx.fillRect(x,mid-v,1,Math.max(1,v*2))}}
+ else{tx.fillStyle="#555a6b";tx.fillText("คลื่นเสียงจะแสดงหลังนำเข้าเพลง",10,mid)}
+ tx.fillStyle="#fff";const px=t/D*w;tx.fillRect(px,0,2,h);}
+function hit(e){const r=tcv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,D=dur()||60,w=r.width;
+ if(y>24&&y<60)for(let i=0;i<S.lines.length;i++){const l=S.lines[i];if(l.s==null)continue;const a=l.s/D*w,b=lend(i)/D*w;
+  if(x>=a-4&&x<=b+4){return{i,edge:Math.abs(x-a)<6?"s":Math.abs(x-b)<6?"e":"m"}}}
+ return null}
+tcv.onpointerdown=e=>{const r=tcv.getBoundingClientRect(),D=dur()||60,h=hit(e);
+ if(h){S.sel=h.i;drag={...h,x0:e.clientX,s0:S.lines[h.i].s,e0:lend(h.i)};tcv.setPointerCapture(e.pointerId);renderLines()}
+ else if(dur())au.currentTime=(e.clientX-r.left)/r.width*D};
+tcv.onpointermove=e=>{const r=tcv.getBoundingClientRect(),D=dur()||60;
+ if(!drag){const h=hit(e);tcv.style.cursor=h?(h.edge==="m"?"grab":"ew-resize"):"pointer";return}
+ const dt=(e.clientX-drag.x0)/r.width*D,l=S.lines[drag.i];
+ if(drag.edge==="m"){l.s=Math.max(0,drag.s0+dt);l.e=drag.e0+(l.s-drag.s0)}
+ else if(drag.edge==="s")l.s=Math.min(Math.max(0,drag.s0+dt),drag.e0-.05);
+ else l.e=Math.max(drag.e0+dt,l.s+.05)};
+tcv.onpointerup=()=>{if(drag){drag=null;renderLines();save()}};
+
+/* export (browser-side) */
+$("#bExp").onclick=async()=>{
+ if(!au.src)return toast("นำเข้าเพลงก่อน");
+ if(!window.MediaRecorder||!pv.captureStream||!au.captureStream)return toast("เบราว์เซอร์นี้ส่งออกไม่ได้ ต้องใช้ Chrome, Edge หรือ Firefox ล่าสุด");
+ toast("เริ่มบันทึก จะเล่นเพลงตั้งแต่ต้นจนจบ (ไฟล์ WebM) คลิกปุ่มเดิมเพื่อยกเลิก");
+ try{
+  au.pause();au.currentTime=0;const vs=pv.captureStream(30),as=au.captureStream();as.getAudioTracks().forEach(t=>vs.addTrack(t));
+  const mt=["video/webm;codecs=vp9,opus","video/webm"].find(m=>MediaRecorder.isTypeSupported(m)),rec=new MediaRecorder(vs,{mimeType:mt,videoBitsPerSecond:6e6}),ch=[];
+  rec.ondataavailable=e=>e.data.size&&ch.push(e.data);
+  const done=new Promise(r=>rec.onstop=r);rec.start(500);await au.play();
+  const b=$("#bExp");b.textContent="กำลังเรนเดอร์… (คลิกเพื่อยกเลิก)";let stop=false;b.onclick=()=>{stop=true;au.pause()};
+  await new Promise(r=>{au.onended=r;const iv=setInterval(()=>{if(stop||au.paused){clearInterval(iv);r()}},300)});
+  rec.stop();await done;
+  b.textContent="ส่งออกวิดีโอ";b.onclick=()=>$("#bExp").dispatchEvent(new Event("x"));location.hash="";
+  if(stop){toast("ยกเลิกการส่งออกแล้ว");setTimeout(()=>location.reload,0);return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(ch,{type:"video/webm"}));a.download=($("#pname").value||"karaoke")+".webm";a.click();toast("สร้างไฟล์สำเร็จ");
+ }catch(e){toast("ส่งออกไม่สำเร็จ: "+e.message)}
+ $("#bExp").textContent="ส่งออกวิดีโอ"};
+
+/* project */
+const proj=()=>JSON.stringify({v:1,name:$("#pname").value,lines:S.lines,st:S.st,phOn:S.phOn,grad:S.grad});
+function save(){commit();try{localStorage.setItem("ksai",proj())}catch(e){}}
+function load(j){const p=JSON.parse(j);S.lines=p.lines||[];Object.assign(S.st,p.st||{});S.phOn=!!p.phOn;S.grad=p.grad||0;$("#pname").value=p.name||"โปรเจกต์";syncCtl();renderLines();snap();commit()}
+$("#bUn").onclick=()=>undoDo();$("#bRe").onclick=()=>redoDo();
+$("#bSave").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([proj()],{type:"application/json"}));a.download=$("#pname").value+".karaoke.json";a.click();toast("บันทึกไฟล์โปรเจกต์แล้ว (ไม่รวมไฟล์เพลงและพื้นหลัง ต้องนำเข้าใหม่)")};
+$("#bOpen").onclick=()=>$("#fOpen").click();
+$("#fOpen").onchange=async e=>{try{load(await e.target.files[0].text());toast("เปิดโปรเจกต์แล้ว นำเข้าเพลงอีกครั้งเพื่อเล่น")}catch(x){toast("ไฟล์โปรเจกต์ไม่ถูกต้อง")}};
+$("#bNew").onclick=()=>{snap();S.lines=[];S.sel=-1;S.phOn=false;$("#pname").value="โปรเจกต์ใหม่";syncCtl();renderLines();save();toast("เริ่มโปรเจกต์ใหม่แล้ว",1)};
+document.addEventListener("keydown",e=>{const tag=document.activeElement.tagName;
+ if((e.ctrlKey||e.metaKey)&&e.key==="s"){e.preventDefault();$("#bSave").click();return}
+ if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT")return;
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){e.preventDefault();e.shiftKey?redoDo():undoDo();return}
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="y"){e.preventDefault();redoDo();return}
+ if(e.code==="Space"){e.preventDefault();S.tap>=0?doTap():$("#bPlay").click()}
+ else if(e.key==="f"||e.key==="F")$("#bFs").click();
+ else if(e.key==="Home")au.currentTime=0;
+ else if(e.key==="ArrowLeft")au.currentTime=Math.max(0,au.currentTime-(e.shiftKey?5:.5));
+ else if(e.key==="ArrowRight")au.currentTime+=e.shiftKey?5:.5});
+/* resizable panels */
+const L={lw:330,rw:270,th:210},LD={lw:330,rw:270,th:210};
+try{Object.assign(L,JSON.parse(localStorage.getItem("ksl")||"{}"))}catch(e){}
+function applyL(){const W=innerWidth,Hh=innerHeight;
+ L.lw=Math.min(Math.max(L.lw,160),Math.max(160,W-L.rw-320));L.rw=Math.min(Math.max(L.rw,160),Math.max(160,W-L.lw-320));L.th=Math.min(Math.max(L.th,90),Math.max(90,Hh-230));
+ const R=document.documentElement.style;R.setProperty("--lw",L.lw+"px");R.setProperty("--rw",L.rw+"px");R.setProperty("--th",L.th+"px");try{localStorage.setItem("ksl",JSON.stringify(L))}catch(e){}}
+document.querySelectorAll(".gh").forEach(h=>{const k=h.dataset.k;
+ h.onpointerdown=e=>{e.preventDefault();h.setPointerCapture(e.pointerId);h.classList.add("on");document.body.style.userSelect="none"};
+ h.onpointermove=e=>{if(!h.classList.contains("on"))return;L[k]=k==="lw"?e.clientX:k==="rw"?innerWidth-e.clientX:innerHeight-e.clientY;applyL()};
+ h.onpointerup=()=>{h.classList.remove("on");document.body.style.userSelect=""};
+ h.ondblclick=()=>{L[k]=LD[k];applyL()}});
+function fitPv(){if(document.fullscreenElement===pv)return;const r=$(".stage").getBoundingClientRect(),k=Math.min(Math.max(50,r.width-28)/pv.width,Math.max(50,r.height-28)/pv.height);pv.style.width=pv.width*k+"px";pv.style.height=pv.height*k+"px"}
+new ResizeObserver(fitPv).observe($(".stage"));document.addEventListener("fullscreenchange",fitPv);
+$("#bRl").onclick=()=>{Object.assign(L,LD);applyL();toast("คืนขนาดแผงแล้ว")};
+window.addEventListener("resize",applyL);applyL();fitPv();
+try{const j=localStorage.getItem("ksai");if(j)load(j)}catch(e){}
+syncCtl();
+(function loop(){frame();requestAnimationFrame(loop)})();
+</script></body></html>
