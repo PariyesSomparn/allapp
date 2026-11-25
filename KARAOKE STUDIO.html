@@ -4,7 +4,7 @@
 <title>KARAOKE STUDIO</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;800&family=Prompt:wght@400;600;800&family=Sarabun:wght@400;700&display=swap">
 <style>
-:root{--bg:#16171b;--p1:#0e0f12;--p2:#1d1f25;--ln:#2b2e37;--tx:#e8e9ee;--mu:#8b90a0;--ac:#8b7cff;--cy:#4fd8f0;--rd:8px;--lw:330px;--rw:270px;--th:210px;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--bg:#16171b;--p1:#0e0f12;--p2:#1d1f25;--ln:#2b2e37;--tx:#e8e9ee;--mu:#8b90a0;--ac:#8b7cff;--cy:#4fd8f0;--rd:8px;--lw:330px;--rw:270px;--th:300px;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--tx);font:13px/1.4 "Noto Sans Thai",system-ui,sans-serif;display:grid;grid-template-rows:48px minmax(0,1fr) var(--th);grid-template-columns:var(--lw) minmax(0,1fr) var(--rw);overflow:hidden}
 button,select,input,textarea{font:inherit;color:inherit}
@@ -37,7 +37,7 @@ canvas#pv{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);widt
 .tr .tc{font-variant-numeric:tabular-nums;color:var(--cy);min-width:110px}.tr input[type=range]{flex:1}
 .tl{grid-column:1/4;background:var(--p1);border-top:1px solid var(--ln);display:flex;flex-direction:column;min-height:0;overflow:hidden}
 .tl .bar{display:flex;gap:6px;align-items:center;padding:6px 12px;border-bottom:1px solid var(--ln);flex-wrap:wrap}
-.tlw{position:relative;flex:1;min-height:0}canvas#tc{width:100%;height:100%;display:block;cursor:pointer}
+.tlw{position:relative;flex:1;min-height:0;overflow:auto}canvas#tc{width:100%;display:block}.sep{width:1px;height:20px;background:var(--ln)}
 .line{background:var(--p2);border:1px solid var(--ln);border-radius:var(--rd);padding:8px;display:grid;gap:5px}
 .line.sel{border-color:var(--ac)}.line.cur{box-shadow:inset 3px 0 var(--cy)}
 .line .t{display:grid;grid-template-columns:1fr 1fr auto auto;gap:5px;align-items:center}
@@ -89,7 +89,7 @@ ul.st{list-style:none;margin:0;padding:0;display:grid;gap:6px}ul.st li{backgroun
  <div class="pane" id="p-st">
   <ul class="st">
    <li><b class="ok">ขั้นตอน</b> 1) นำเข้าเพลงที่แท็บ “สื่อ” 2) วางเนื้อเพลงที่แท็บ “เนื้อเพลง” (แบบมีเวลา [mm:ss] หรือไม่มีเวลาแล้วใช้ Tap-to-Sync) 3) เลือกพื้นหลังและสไตล์ 4) พรีวิว 5) ส่งออกวิดีโอ</li>
-   <li><b class="ok">คีย์ลัด</b> Space เล่น/หยุด · Ctrl+Z ย้อนกลับ · Ctrl+Shift+Z ทำซ้ำ · Ctrl+S บันทึก · F เต็มจอ · ลูกศร เลื่อนตำแหน่ง</li>
+   <li><b class="ok">คีย์ลัด</b> Space เล่น/หยุด · Ctrl+Z ย้อนกลับ · Ctrl+Shift+Z ทำซ้ำ · Ctrl+S บันทึก · F เต็มจอ · +/- หรือ Ctrl+ล้อเมาส์ ซูมไทม์ไลน์ · Delete ลบที่เลือก · ลูกศร เลื่อนตำแหน่ง</li>
    <li><b class="no">หมายเหตุ</b> ส่งออกเป็นไฟล์ WebM โดยบันทึกจากพรีวิวแบบเรียลไทม์ (ใช้ Chrome, Edge หรือ Firefox) ไฟล์โปรเจกต์ไม่รวมไฟล์เพลงและพื้นหลัง ต้องนำเข้าใหม่ทุกครั้ง ผู้ใช้ต้องมีสิทธิ์ใช้งานสื่อที่นำเข้า</li>
   </ul>
  </div>
@@ -125,7 +125,13 @@ ul.st{list-style:none;margin:0;padding:0;display:grid;gap:6px}ul.st li{backgroun
 </section>
 
 <div class="tl">
- <div class="bar"><button id="bRl" title="คืนขนาดแผงทั้งหมด">รีเซ็ตเลย์เอาต์</button><button id="bSplit">แยกบรรทัดที่เล่นอยู่</button><button id="bDel">ลบบรรทัดที่เลือก</button><span style="color:var(--mu)">คลิกไทม์ไลน์เพื่อเลื่อนตำแหน่ง · Space เล่น/หยุด · ลากขอบบล็อกเพื่อปรับเวลา</span></div>
+ <div class="bar">
+ <button id="tUn" disabled title="ย้อนกลับ (Ctrl+Z)">↶ ย้อนกลับ</button><button id="tRe" disabled title="ทำซ้ำ (Ctrl+Shift+Z)">↷ ทำซ้ำ</button><span class="sep"></span>
+ <button id="zO" title="ซูมออก (-)">− ซูมออก</button><button id="zI" title="ซูมเข้า (+ หรือ Ctrl+ล้อเมาส์)">＋ ซูมเข้า</button><button id="zF" title="ดูทั้งเพลง">พอดี</button><input type="range" id="tpan" min="0" max="1000" value="0" style="width:110px" title="เลื่อนไทม์ไลน์ (หรือ Shift+ล้อเมาส์)"><span id="tz" style="color:var(--cy);min-width:64px"></span><span class="sep"></span>
+ <button id="tAddT">＋ ข้อความ</button><button id="tAddV">＋ วิดีโอ</button><button id="tAddS">＋ เสียง</button><button id="tAddI">＋ ภาพ</button>
+ <input type="file" id="tfv" accept="video/*" hidden><input type="file" id="tfs" accept="audio/*" hidden><input type="file" id="tfi" accept="image/*" hidden><span class="sep"></span>
+ <button id="bSplit" title="ตัดคลิปหรือข้อความที่ตำแหน่งหัวเล่น">✂ ตัด</button><button id="bDel" title="Delete">ลบที่เลือก</button><button id="bRl" title="คืนขนาดแผงทั้งหมด">รีเซ็ตเลย์เอาต์</button>
+</div>
  <div class="tlw"><canvas id="tc"></canvas></div>
 </div>
 <div class="gh gl" data-k="lw" title="ลากเพื่อปรับขนาด · ดับเบิลคลิกเพื่อรีเซ็ต"></div><div class="gh gr" data-k="rw" title="ลากเพื่อปรับขนาด · ดับเบิลคลิกเพื่อรีเซ็ต"></div><div class="gh gb" data-k="th" title="ลากเพื่อปรับขนาด · ดับเบิลคลิกเพื่อรีเซ็ต"></div>
@@ -133,17 +139,17 @@ ul.st{list-style:none;margin:0;padding:0;display:grid;gap:6px}ul.st li{backgroun
 
 <script>
 const $=s=>document.querySelector(s),au=document.createElement("audio");au.preload="auto";
-const S={lines:[],sel:-1,peaks:null,phOn:false,safe:false,tap:-1,bgT:"grad",bgEl:null,grad:0,name:"",
+const S={lines:[],clips:[],selc:null,sel:-1,peaks:null,phOn:false,safe:false,tap:-1,bgT:"grad",bgEl:null,grad:0,name:"",
  st:{mode:"fill",font:"Noto Sans Thai",size:68,y:72,c1:"#ffffff",c2:"#4fd8f0",outl:6,glow:0,nxt:true,phS:.65,c3:"#d6d6d6",c4:"#55d6ff",dim:.35,zoom:1,fillSpd:1}};
 const GR=[["#241a4a","#0b2a3a"],["#3a1030","#101030"],["#0d1b2a","#1b4a5a"],["#2b1a0e","#0e0e12"]];
 const PRE={Classic:{c1:"#ffffff",c2:"#ffe14f",outl:7,glow:0},Neon:{c1:"#e9d9ff",c2:"#4fd8f0",outl:3,glow:28},Cinematic:{c1:"#f2efe8",c2:"#ffb86b",outl:4,glow:6,font:"Georgia"},Minimal:{c1:"#ffffff",c2:"#8b7cff",outl:0,glow:0},"Thai":{c1:"#ffffff",c2:"#ff5fa2",outl:8,glow:0,font:"Prompt"}};
 const toast=(m,u)=>{const t=$("#toast");t.textContent=m;if(u){const b=document.createElement("button");b.textContent="ย้อนกลับ";b.style.marginLeft="10px";b.onclick=()=>undoDo();t.append(b)}t.style.display="block";clearTimeout(t._h);t._h=setTimeout(()=>t.style.display="none",u?7000:3200)};
 const H={u:[],r:[],cur:null,t:0};
-const st=()=>JSON.stringify({l:S.lines,p:S.phOn});
+const st=()=>JSON.stringify({l:S.lines,p:S.phOn,c:S.clips});
 const snap=()=>{H.t=0};
-function updBtn(){const a=$("#bUn"),b=$("#bRe");if(a){a.disabled=!H.u.length;b.disabled=!H.r.length}}
+function updBtn(){document.querySelectorAll("#bUn,#tUn").forEach(a=>a.disabled=!H.u.length);document.querySelectorAll("#bRe,#tRe").forEach(b=>b.disabled=!H.r.length)}
 function commit(){const n=st();if(H.cur===null){H.cur=n;return}if(n===H.cur)return;const now=Date.now();if(now-H.t>700||!H.u.length){H.u.push(H.cur);if(H.u.length>100)H.u.shift()}H.cur=n;H.t=now;H.r=[];updBtn()}
-function applySt(s){const p=JSON.parse(s);S.lines=p.l;S.phOn=p.p;S.sel=-1;tapOn(-1);syncCtl();renderLines();try{localStorage.setItem("ksai",proj())}catch(e){}H.cur=s;H.t=0;updBtn()}
+function applySt(s){const p=JSON.parse(s);S.lines=p.l;S.phOn=p.p;S.clips=p.c||[];S.selc=null;S.sel=-1;tapOn(-1);syncCtl();renderLines();try{localStorage.setItem("ksai",proj())}catch(e){}H.cur=s;H.t=0;updBtn()}
 function redoDo(){if(!H.r.length)return toast("ไม่มีอะไรให้ทำซ้ำ");H.u.push(H.cur);applySt(H.r.pop());toast("ทำซ้ำแล้ว")}
 function undoDo(){if(!H.u.length)return toast("ไม่มีอะไรให้ย้อนกลับ");H.r.push(H.cur);applySt(H.u.pop());toast("ย้อนกลับแล้ว")}
 const fmt=t=>{t=Math.max(0,t||0);return String(Math.floor(t/60)).padStart(2,"0")+":"+(t%60).toFixed(2).padStart(5,"0")};
@@ -162,9 +168,9 @@ async function loadFile(f){
  try{
   const ctx=new (window.AudioContext||window.webkitAudioContext)();
   const buf=await ctx.decodeAudioData(await f.arrayBuffer());ctx.close();
-  const d=buf.getChannelData(0),N=2400,step=Math.floor(d.length/N)||1,p=new Float32Array(N);
+  const d=buf.getChannelData(0),N=Math.min(600000,Math.max(2400,Math.ceil(buf.duration*400))),step=Math.floor(d.length/N)||1,p=new Float32Array(N);
   for(let i=0;i<N;i++){let m=0;for(let j=0;j<step;j+=Math.max(1,step>>5)){const v=Math.abs(d[i*step+j]||0);if(v>m)m=v}p[i]=m}
-  S.peaks=p;
+  S.peaks=p;S.prate=N/buf.duration;S.mname=f.name;TL.pps=0;
   $("#minfo").innerHTML="<b>"+f.name+"</b><br>ความยาว "+fmt(buf.duration)+" · "+buf.sampleRate+" Hz · "+buf.numberOfChannels+" ช่อง · "+(f.size/1048576).toFixed(1)+" MB"+(f.type.startsWith("video")?"<br>ดึงเสียงจากวิดีโอแล้ว":"");
   if(f.type.startsWith("video")&&!S.bgEl){useVideoBg(au.src,true)}
  }catch(e){$("#minfo").textContent="อ่านคลื่นเสียงไม่สำเร็จ ("+e.message+") ยังเล่นเสียงได้ถ้าเบราว์เซอร์รองรับ";toast("สร้างคลื่นเสียงไม่ได้")}
@@ -197,7 +203,7 @@ function renderLines(){
   q(".sp").onchange=e=>{l.sp=e.target.checked;save()};
   q(".v").value=l.v!=null?l.v:"";q(".v").onchange=e=>{const x=e.target.value===""?null:Math.min(5,Math.max(.3,+e.target.value));l.v=x;e.target.value=x==null?"":x;save()};q(".vr").onclick=ev=>{ev.stopPropagation();l.v=null;q(".v").value="";save()};
   q(".dl").onclick=ev=>{ev.stopPropagation();snap();S.lines.splice(i,1);S.sel=-1;renderLines();save();toast("ลบบรรทัดแล้ว",1)};
-  d.onclick=e=>{S.sel=i;document.querySelectorAll(".line").forEach(x=>x.classList.toggle("sel",x.dataset.i==i));if(e.target.tagName!=="INPUT"&&l.s!=null)au.currentTime=l.s};
+  d.onclick=e=>{S.sel=i;S.selc=null;document.querySelectorAll(".line").forEach(x=>x.classList.toggle("sel",x.dataset.i==i));if(e.target.tagName!=="INPUT"&&l.s!=null)au.currentTime=l.s};
   box.append(d)});
 }
 $("#bMk").onclick=()=>{
@@ -237,8 +243,8 @@ document.querySelectorAll(".nd,#bNudge").forEach(b=>b.onclick=()=>{
  l.s=Math.max(0,l.s+d);if(l.e!=null)l.e=Math.max(l.s,l.e+d);renderLines();save()});
 $("#bClr").onclick=()=>{if(!S.lines.length&&!$("#lyrIn").value)return toast("ยังไม่มีเนื้อเพลงให้ลบ");
  snap();S.lines=[];S.sel=-1;tapOn(-1);$("#lyrIn").value="";renderLines();save();toast("ลบเนื้อเพลงทั้งหมดแล้ว",1)};
-$("#bDel").onclick=()=>{if(S.sel<0)return toast("เลือกบรรทัดก่อน");snap();S.lines.splice(S.sel,1);S.sel=-1;renderLines();save();toast("ลบบรรทัดแล้ว",1)};
-$("#bSplit").onclick=()=>{const t=au.currentTime,i=S.lines.findIndex((l,k)=>l.s!=null&&t>l.s&&t<lend(k));
+$("#bDel").onclick=()=>{if(S.selc){snap();S.clips=S.clips.filter(c=>c.id!==S.selc);S.selc=null;save();toast("ลบคลิปแล้ว",1);return}if(S.sel<0)return toast("เลือกบรรทัดหรือคลิปก่อน");snap();S.lines.splice(S.sel,1);S.sel=-1;renderLines();save();toast("ลบบรรทัดแล้ว",1)};
+$("#bSplit").onclick=()=>{const t=au.currentTime;if(S.selc){splitClip(t);return}const i=S.lines.findIndex((l,k)=>l.s!=null&&t>l.s&&t<lend(k));
  if(i<0)return toast("เลื่อนหัวเล่นไปอยู่กลางบรรทัดก่อน");
  const l=S.lines[i],e=lend(i),w=[...l.t],cut=Math.round(w.length/2);
  S.lines.splice(i,1,{...l,t:w.slice(0,cut).join("").trim(),e:t},{t:w.slice(cut).join("").trim(),p:"",s:t,e:e,sp:true});renderLines();save()};
@@ -292,7 +298,7 @@ function group(i,y,size,frac,alpha,cur){const l=S.lines[i],s=S.st;txt(l.t,y,size
  if(S.phOn&&l.sp!==false&&l.p){const ps=size*s.phS;txt(l.p,y+size*.78,ps,s.c3,s.c4,frac,alpha)}}
 function frame(){
  const W=pv.width,H=pv.height,s=S.st,t=au.currentTime;
- cx.clearRect(0,0,W,H);drawBg();
+ cx.clearRect(0,0,W,H);drawBg();drawClips();syncClips();
  const sc=H/720,size=s.size*sc;let ci=-1;
  for(let i=0;i<S.lines.length;i++){const l=S.lines[i];if(l.s!=null&&t>=l.s&&t<lend(i)){ci=i;break}}
  if(ci>=0){const l=S.lines[ci],e=lend(ci),fr=s.mode==="fill"?Math.min(1,(t-l.s)*(l.v>0?l.v:(s.fillSpd||1))/Math.max(.05,e-l.s)):1;
@@ -304,33 +310,101 @@ function frame(){
  if(dur()&&document.activeElement!==$("#seek"))$("#seek").value=t/dur()*1000;
  drawTl(t)}
 /* timeline */
-const tcv=$("#tc"),tx=tcv.getContext("2d");let drag=null;
+const tcv=$("#tc"),tx=tcv.getContext("2d"),G=100,EL={};let drag=null,AC=null,DST=null;
+const LN=[["TXT ข้อความ",36,"#4b4390"],["VDO วิดีโอ",36,"#2f6f8f"],["SOUND เสียงหลัก",64,0],["SOUND เสียงเสริม",36,"#2f8f6a"],["PICTURE ภาพ",36,"#8f6a2f"]];
+const LY=[];{let y=22;LN.forEach(l=>{LY.push(y);y+=l[1]+3});LY.total=y+4}
+const TYPE_LANE={video:1,audio:3,image:4},TL={pps:0,t0:0};
+const total=()=>Math.max(dur(),10,...S.clips.map(c=>c.s+c.d));
+const x2t=x=>TL.t0+(x-G)/TL.pps,t2x=t=>G+(t-TL.t0)*TL.pps,clipOf=id=>S.clips.find(c=>c.id===id);
+const fitZ=()=>{TL.pps=Math.max(1,(tcv.parentNode.clientWidth-G-8)/total());TL.t0=0};
+function zoom(f,cx){const off=cx!=null?cx-G:(tcv.parentNode.clientWidth-G)/2,ct=TL.t0+off/TL.pps;TL.pps=Math.min(1000,Math.max(1,TL.pps*f));TL.t0=Math.max(0,ct-off/TL.pps)}
+function connEl(e){if(e._c)return;const s=AC.createMediaElementSource(e);s.connect(AC.destination);s.connect(DST);e._c=1}
+function mix(){if(AC)return;AC=new (window.AudioContext||window.webkitAudioContext)();DST=AC.createMediaStreamDestination();connEl(au);Object.values(EL).forEach(e=>e.pause&&connEl(e))}
+const rid=()=>"c"+Date.now()+Math.floor(Math.random()*999);
+async function addClip(type,f){
+ if(!f)return;const url=URL.createObjectURL(f),id=rid();let el,sd=0;
+ try{
+  if(type==="image"){el=new Image();await new Promise((ok,no)=>{el.onload=ok;el.onerror=no;el.src=url})}
+  else{el=document.createElement(type==="video"?"video":"audio");el.preload="auto";el.playsInline=true;if(type==="video")el.muted=true;el.src=url;
+   await new Promise((ok,no)=>{el.onloadedmetadata=ok;el.onerror=no});sd=isFinite(el.duration)?el.duration:5}
+ }catch(e){return toast("เปิดไฟล์ไม่ได้: "+f.name)}
+ EL[id]=el;if(AC&&el.pause)connEl(el);snap();
+ S.clips.push({id,type,name:f.name,s:au.currentTime||0,d:type==="image"?5:sd,in:0,sd,vol:1});S.selc=id;S.sel=-1;save();renderLines();
+ toast("เพิ่มคลิปที่ตำแหน่งหัวเล่น ลากเพื่อย้าย ลากขอบเพื่อย่อ/ขยาย")}
+function splitClip(t){const c=clipOf(S.selc);if(!c)return;if(t<=c.s+.05||t>=c.s+c.d-.05)return toast("เลื่อนหัวเล่นให้อยู่กลางคลิปที่เลือกก่อน");
+ snap();const n={...c,id:rid(),s:t,d:c.s+c.d-t,in:c.type==="image"?0:c.in+(t-c.s)};c.d=t-c.s;EL[n.id]=EL[c.id];S.clips.push(n);S.selc=n.id;save()}
+[["tAddV","tfv","video"],["tAddS","tfs","audio"],["tAddI","tfi","image"]].forEach(([b,i,ty])=>{$("#"+b).onclick=()=>$("#"+i).click();$("#"+i).onchange=e=>{addClip(ty,e.target.files[0]);e.target.value=""}});
+$("#tAddT").onclick=()=>{snap();const t=au.currentTime||0;S.lines.push({t:"ข้อความใหม่",p:"",s:t,e:t+3,sp:true});S.lines.sort((a,b)=>(a.s==null)-(b.s==null)||a.s-b.s);S.sel=S.lines.findIndex(l=>l.t==="ข้อความใหม่"&&l.s===t);S.selc=null;renderLines();save()};
+$("#zI").onclick=()=>zoom(1.5);$("#zO").onclick=()=>zoom(1/1.5);$("#zF").onclick=()=>{TL.pps=0};
+$("#tUn").onclick=()=>undoDo();$("#tRe").onclick=()=>redoDo();
+$("#tpan").oninput=()=>{const m=total()-(tcv.parentNode.clientWidth-G)/TL.pps;TL.t0=Math.max(0,m)*($("#tpan").value/1000)};
+function cover(e,W,H){const w=e.videoWidth||e.naturalWidth,h=e.videoHeight||e.naturalHeight;if(!w)return false;const k=Math.max(W/w,H/h);cx.drawImage(e,(W-w*k)/2,(H-h*k)/2,w*k,h*k);return true}
+function drawClips(){const W=pv.width,H=pv.height,t=au.currentTime;let any=false;
+ for(const ty of["video","image"])for(const c of S.clips)if(c.type===ty&&t>=c.s&&t<c.s+c.d){const el=EL[c.id];if(el&&cover(el,W,H))any=true}
+ if(any){cx.fillStyle="rgba(0,0,0,"+S.st.dim+")";cx.fillRect(0,0,W,H)}}
+function syncClips(){const t=au.currentTime,on=!au.paused,act=new Set();
+ for(const c of S.clips){const el=EL[c.id];if(!el||c.type==="image"||!(t>=c.s&&t<c.s+c.d))continue;act.add(el);const w=c.in+(t-c.s);
+  if(Math.abs(el.currentTime-w)>(on?.35:.04))try{el.currentTime=w}catch(e){}
+  if(c.type==="audio")el.volume=Math.min(1,Math.max(0,c.vol));
+  if(on&&el.paused)el.play().catch(()=>{});if(!on&&!el.paused)el.pause()}
+ Object.values(EL).forEach(el=>{if(el.pause&&!act.has(el)&&!el.paused)el.pause()})}
+let _tz="";
 function drawTl(t){
- const r=tcv.getBoundingClientRect(),dp=devicePixelRatio||1;if(tcv.width!==Math.round(r.width*dp)){tcv.width=Math.round(r.width*dp);tcv.height=Math.round(r.height*dp)}
- const W=tcv.width,H=tcv.height;tx.setTransform(dp,0,0,dp,0,0);const w=W/dp,h=H/dp,D=dur()||60;tx.clearRect(0,0,w,h);
- tx.fillStyle="#8b90a0";tx.font="10px sans-serif";tx.fillStyle="#13141a";tx.fillRect(0,0,w,18);
- const stp=D>240?30:D>90?10:5;for(let k=0;k<=D;k+=stp){const x=k/D*w;tx.fillStyle="#2b2e37";tx.fillRect(x,0,1,h);tx.fillStyle="#8b90a0";tx.fillText(fmt(k).slice(0,5),x+3,12)}
- const ly=24,lh=36;tx.fillStyle="#181a21";tx.fillRect(0,ly,w,lh);
- S.lines.forEach((l,i)=>{if(l.s==null)return;const x=l.s/D*w,e=lend(i)/D*w;tx.fillStyle=i===S.sel?"#8b7cff":"#4b4390";tx.fillRect(x,ly+3,Math.max(2,e-x-1),lh-6);
-  tx.fillStyle="#fff";tx.save();tx.beginPath();tx.rect(x,ly,Math.max(0,e-x-2),lh);tx.clip();tx.fillText(l.t,x+4,ly+22);tx.restore()});
- const wy=ly+lh+6,wh=h-wy-4,mid=wy+wh/2;
- if(S.peaks){tx.fillStyle="#4fd8f0";const n=S.peaks.length;for(let x=0;x<w;x++){const v=S.peaks[Math.floor(x/w*n)]*wh/2;tx.fillRect(x,mid-v,1,Math.max(1,v*2))}}
- else{tx.fillStyle="#555a6b";tx.fillText("คลื่นเสียงจะแสดงหลังนำเข้าเพลง",10,mid)}
- tx.fillStyle="#fff";const px=t/D*w;tx.fillRect(px,0,2,h);}
-function hit(e){const r=tcv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,D=dur()||60,w=r.width;
- if(y>24&&y<60)for(let i=0;i<S.lines.length;i++){const l=S.lines[i];if(l.s==null)continue;const a=l.s/D*w,b=lend(i)/D*w;
-  if(x>=a-4&&x<=b+4){return{i,edge:Math.abs(x-a)<6?"s":Math.abs(x-b)<6?"e":"m"}}}
+ const w=tcv.parentNode.clientWidth,h=LY.total,dp=devicePixelRatio||1;if(w<120)return;
+ if(tcv.width!==Math.round(w*dp)||tcv.height!==Math.round(h*dp)){tcv.width=Math.round(w*dp);tcv.height=Math.round(h*dp);tcv.style.height=h+"px"}
+ if(!TL.pps)fitZ();
+ const D=total(),vis=(w-G)/TL.pps;
+ if(!au.paused&&!drag){const x=t2x(t);if(x>w-20||x<G)TL.t0=Math.max(0,t-20/TL.pps)}
+ TL.t0=Math.min(Math.max(0,TL.t0),Math.max(0,D-vis));
+ tx.setTransform(dp,0,0,dp,0,0);tx.clearRect(0,0,w,h);
+ tx.fillStyle="#13141a";tx.fillRect(0,0,w,22);
+ LN.forEach((l,i)=>{tx.fillStyle="#181a21";tx.fillRect(G,LY[i],w-G,l[1])});
+ tx.save();tx.beginPath();tx.rect(G,0,w-G,h);tx.clip();
+ const stp=[.05,.1,.25,.5,1,2,5,10,15,30,60,120,300].find(s=>s*TL.pps>=80)||600,mn=stp/5,i0=Math.floor(TL.t0/mn),i1=Math.ceil((TL.t0+vis)/mn);
+ tx.font="10px sans-serif";
+ for(let i=i0;i<=i1;i++){const x=Math.round(t2x(i*mn))+.5,mj=i%5===0;if(mj){tx.fillStyle="#252833";tx.fillRect(x,22,1,h-22)}tx.fillStyle=mj?"#6b7080":"#3a3d4a";tx.fillRect(x,mj?10:16,1,mj?12:6);if(mj){tx.fillStyle="#8b90a0";tx.fillText(fmt(i*mn).slice(0,stp<.1?8:stp<1?7:5),x+3,10)}}
+ S.lines.forEach((l,i)=>{if(l.s==null)return;const x=t2x(l.s),x2=t2x(lend(i));if(x2<G||x>w)return;tx.fillStyle=i===S.sel?"#8b7cff":LN[0][2];tx.fillRect(x,LY[0]+3,Math.max(2,x2-x-1),LN[0][1]-6);
+  tx.fillStyle="#fff";tx.save();tx.beginPath();tx.rect(x,LY[0],Math.max(0,x2-x-2),LN[0][1]);tx.clip();tx.fillText(l.t,x+4,LY[0]+22);tx.restore()});
+ for(const c of S.clips){const ln=TYPE_LANE[c.type],x=t2x(c.s),x2=t2x(c.s+c.d);if(x2<G||x>w)continue;
+  tx.fillStyle=LN[ln][2];tx.fillRect(x,LY[ln]+3,Math.max(2,x2-x-1),LN[ln][1]-6);
+  if(c.id===S.selc){tx.strokeStyle="#fff";tx.lineWidth=2;tx.strokeRect(x+1,LY[ln]+4,Math.max(2,x2-x-3),LN[ln][1]-8)}
+  tx.fillStyle="#fff";tx.save();tx.beginPath();tx.rect(x,LY[ln],Math.max(0,x2-x-2),LN[ln][1]);tx.clip();tx.fillText(c.name+" · "+c.d.toFixed(1)+"s",x+4,LY[ln]+22);tx.restore()}
+ const lh=LN[2][1],mid=LY[2]+lh/2;
+ if(S.peaks){tx.fillStyle="#4fd8f0";const P=S.peaks,R=S.prate;for(let x=G;x<w;x++){const ta=x2t(x);if(ta>dur())break;let a=Math.floor(ta*R),b=Math.max(a+1,Math.ceil(x2t(x+1)*R)),m=0;for(let i=a;i<b&&i<P.length;i++)if(P[i]>m)m=P[i];const v=m*(lh/2-2);tx.fillRect(x,mid-v,1,Math.max(1,v*2))}}
+ else{tx.fillStyle="#555a6b";tx.fillText("คลื่นเสียงจะแสดงหลังนำเข้าเพลง",G+10,mid)}
+ const px=t2x(t);tx.fillStyle="#fff";tx.fillRect(px-1,0,2,h);
+ tx.restore();
+ tx.fillStyle="#13141a";tx.fillRect(0,0,G,h);tx.font="600 10px sans-serif";
+ LN.forEach((l,i)=>{tx.fillStyle="#8b90a0";tx.fillText(l[0],8,LY[i]+l[1]/2+4)});
+ tx.fillStyle="#2b2e37";tx.fillRect(G-1,0,1,h);
+ const z=TL.pps.toFixed(0)+" px/s";if(z!==_tz){_tz=z;$("#tz").textContent=z}
+ const pan=$("#tpan");if(document.activeElement!==pan){const m=D-vis;pan.value=m>0?TL.t0/m*1000:0}}
+const ed=(x,a,b)=>b-a<14?"m":x-a<6?"s":b-x<6?"e":"m";
+function hit(e){const r=tcv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;if(x<G)return null;
+ const li=LY.findIndex((ly,i)=>y>=ly&&y<ly+LN[i][1]);
+ if(li===0){for(let i=0;i<S.lines.length;i++){const l=S.lines[i];if(l.s==null)continue;const a=t2x(l.s),b=t2x(lend(i));if(x>=a-4&&x<=b+4)return{k:"l",i,edge:ed(x,a,b)}}}
+ else for(let j=S.clips.length-1;j>=0;j--){const c=S.clips[j];if(TYPE_LANE[c.type]!==li)continue;const a=t2x(c.s),b=t2x(c.s+c.d);if(x>=a-4&&x<=b+4)return{k:"c",id:c.id,edge:ed(x,a,b)}}
  return null}
-tcv.onpointerdown=e=>{const r=tcv.getBoundingClientRect(),D=dur()||60,h=hit(e);
- if(h){S.sel=h.i;drag={...h,x0:e.clientX,s0:S.lines[h.i].s,e0:lend(h.i)};tcv.setPointerCapture(e.pointerId);renderLines()}
- else if(dur())au.currentTime=(e.clientX-r.left)/r.width*D};
-tcv.onpointermove=e=>{const r=tcv.getBoundingClientRect(),D=dur()||60;
- if(!drag){const h=hit(e);tcv.style.cursor=h?(h.edge==="m"?"grab":"ew-resize"):"pointer";return}
- const dt=(e.clientX-drag.x0)/r.width*D,l=S.lines[drag.i];
- if(drag.edge==="m"){l.s=Math.max(0,drag.s0+dt);l.e=drag.e0+(l.s-drag.s0)}
- else if(drag.edge==="s")l.s=Math.min(Math.max(0,drag.s0+dt),drag.e0-.05);
- else l.e=Math.max(drag.e0+dt,l.s+.05)};
+const seekX=e=>{if(dur())au.currentTime=Math.max(0,Math.min(dur(),x2t(e.clientX-tcv.getBoundingClientRect().left)))};
+tcv.onpointerdown=e=>{const r=tcv.getBoundingClientRect(),y=e.clientY-r.top,h=y<22?null:hit(e);snap();
+ if(h&&h.k==="l"){S.sel=h.i;S.selc=null;drag={...h,x0:e.clientX,s0:S.lines[h.i].s,e0:lend(h.i)}}
+ else if(h){S.selc=h.id;S.sel=-1;const c=clipOf(h.id);drag={...h,x0:e.clientX,s0:c.s,d0:c.d,i0:c.in}}
+ else{S.selc=null;S.sel=-1;if(e.clientX-r.left>=G){drag={k:"s"};seekX(e)}}
+ if(drag)tcv.setPointerCapture(e.pointerId);renderLines()};
+tcv.onpointermove=e=>{const r=tcv.getBoundingClientRect();
+ if(!drag){const h=hit(e);tcv.style.cursor=e.clientY-r.top<22?"pointer":h?(h.edge==="m"?"grab":"ew-resize"):"default";return}
+ if(drag.k==="s"){seekX(e);return}
+ const dt=(e.clientX-drag.x0)/TL.pps;
+ if(drag.k==="l"){const l=S.lines[drag.i];
+  if(drag.edge==="m"){l.s=Math.max(0,drag.s0+dt);l.e=drag.e0+(l.s-drag.s0)}
+  else if(drag.edge==="s")l.s=Math.min(Math.max(0,drag.s0+dt),drag.e0-.05);
+  else l.e=Math.max(drag.e0+dt,l.s+.05);return}
+ const c=clipOf(drag.id);if(!c)return;
+ if(drag.edge==="m")c.s=Math.max(0,drag.s0+dt);
+ else if(drag.edge==="s"){const lo=c.type==="image"?-drag.s0:Math.max(-drag.s0,-drag.i0),d=Math.min(Math.max(dt,lo),drag.d0-.1);c.s=drag.s0+d;c.d=drag.d0-d;if(c.type!=="image")c.in=drag.i0+d}
+ else c.d=Math.max(.1,Math.min(drag.d0+dt,c.type==="image"?1e6:c.sd-c.in))};
 tcv.onpointerup=()=>{if(drag){drag=null;renderLines();save()}};
+tcv.addEventListener("wheel",e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();zoom(e.deltaY<0?1.25:.8,e.clientX-tcv.getBoundingClientRect().left)}else if(e.shiftKey||Math.abs(e.deltaX)>Math.abs(e.deltaY)){e.preventDefault();TL.t0+=(e.deltaX||e.deltaY)/TL.pps}},{passive:false});
 
 /* export (browser-side) */
 $("#bExp").onclick=async()=>{
@@ -338,7 +412,7 @@ $("#bExp").onclick=async()=>{
  if(!window.MediaRecorder||!pv.captureStream||!au.captureStream)return toast("เบราว์เซอร์นี้ส่งออกไม่ได้ ต้องใช้ Chrome, Edge หรือ Firefox ล่าสุด");
  toast("เริ่มบันทึก จะเล่นเพลงตั้งแต่ต้นจนจบ (ไฟล์ WebM) คลิกปุ่มเดิมเพื่อยกเลิก");
  try{
-  au.pause();au.currentTime=0;const vs=pv.captureStream(30),as=au.captureStream();as.getAudioTracks().forEach(t=>vs.addTrack(t));
+  au.pause();au.currentTime=0;mix();AC.resume();const vs=pv.captureStream(30),as=DST.stream;as.getAudioTracks().forEach(t=>vs.addTrack(t));
   const mt=["video/webm;codecs=vp9,opus","video/webm"].find(m=>MediaRecorder.isTypeSupported(m)),rec=new MediaRecorder(vs,{mimeType:mt,videoBitsPerSecond:6e6}),ch=[];
   rec.ondataavailable=e=>e.data.size&&ch.push(e.data);
   const done=new Promise(r=>rec.onstop=r);rec.start(500);await au.play();
@@ -359,7 +433,7 @@ $("#bUn").onclick=()=>undoDo();$("#bRe").onclick=()=>redoDo();
 $("#bSave").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([proj()],{type:"application/json"}));a.download=$("#pname").value+".karaoke.json";a.click();toast("บันทึกไฟล์โปรเจกต์แล้ว (ไม่รวมไฟล์เพลงและพื้นหลัง ต้องนำเข้าใหม่)")};
 $("#bOpen").onclick=()=>$("#fOpen").click();
 $("#fOpen").onchange=async e=>{try{load(await e.target.files[0].text());toast("เปิดโปรเจกต์แล้ว นำเข้าเพลงอีกครั้งเพื่อเล่น")}catch(x){toast("ไฟล์โปรเจกต์ไม่ถูกต้อง")}};
-$("#bNew").onclick=()=>{snap();S.lines=[];S.sel=-1;S.phOn=false;$("#pname").value="โปรเจกต์ใหม่";syncCtl();renderLines();save();toast("เริ่มโปรเจกต์ใหม่แล้ว",1)};
+$("#bNew").onclick=()=>{snap();S.clips=[];S.selc=null;S.lines=[];S.sel=-1;S.phOn=false;$("#pname").value="โปรเจกต์ใหม่";syncCtl();renderLines();save();toast("เริ่มโปรเจกต์ใหม่แล้ว",1)};
 document.addEventListener("keydown",e=>{const tag=document.activeElement.tagName;
  if((e.ctrlKey||e.metaKey)&&e.key==="s"){e.preventDefault();$("#bSave").click();return}
  if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT")return;
@@ -367,11 +441,14 @@ document.addEventListener("keydown",e=>{const tag=document.activeElement.tagName
  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="y"){e.preventDefault();redoDo();return}
  if(e.code==="Space"){e.preventDefault();S.tap>=0?doTap():$("#bPlay").click()}
  else if(e.key==="f"||e.key==="F")$("#bFs").click();
+ else if(e.key==="Delete")$("#bDel").click();
+ else if(e.key==="="||e.key==="+")zoom(1.5);
+ else if(e.key==="-")zoom(1/1.5);
  else if(e.key==="Home")au.currentTime=0;
  else if(e.key==="ArrowLeft")au.currentTime=Math.max(0,au.currentTime-(e.shiftKey?5:.5));
  else if(e.key==="ArrowRight")au.currentTime+=e.shiftKey?5:.5});
 /* resizable panels */
-const L={lw:330,rw:270,th:210},LD={lw:330,rw:270,th:210};
+const L={lw:330,rw:270,th:300},LD={lw:330,rw:270,th:300};
 try{Object.assign(L,JSON.parse(localStorage.getItem("ksl")||"{}"))}catch(e){}
 function applyL(){const W=innerWidth,Hh=innerHeight;
  L.lw=Math.min(Math.max(L.lw,160),Math.max(160,W-L.rw-320));L.rw=Math.min(Math.max(L.rw,160),Math.max(160,W-L.lw-320));L.th=Math.min(Math.max(L.th,90),Math.max(90,Hh-230));
