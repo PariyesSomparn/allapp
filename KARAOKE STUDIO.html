@@ -36,7 +36,7 @@ canvas#pv{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);widt
 .tr{display:flex;align-items:center;gap:8px;padding:8px 14px;border-top:1px solid var(--ln);background:var(--p1)}
 .tr .tc{font-variant-numeric:tabular-nums;color:var(--cy);min-width:110px}.tr input[type=range]{flex:1}
 .tl{grid-column:1/4;background:var(--p1);border-top:1px solid var(--ln);display:flex;flex-direction:column;min-height:0;overflow:hidden}
-.tl .bar{display:flex;gap:6px;align-items:center;padding:6px 12px;border-bottom:1px solid var(--ln);flex-wrap:wrap}
+.tl .bar{display:flex;gap:6px;align-items:center;padding:6px 12px;border-bottom:1px solid var(--ln);flex-wrap:nowrap;overflow-x:auto;flex:none;white-space:nowrap}.tl .bar>*{flex:none}
 .tlw{position:relative;flex:1;min-height:0;overflow:auto}canvas#tc{width:100%;display:block}.sep{width:1px;height:20px;background:var(--ln)}
 .line{background:var(--p2);border:1px solid var(--ln);border-radius:var(--rd);padding:8px;display:grid;gap:5px}
 .line.sel{border-color:var(--ac)}.line.cur{box-shadow:inset 3px 0 var(--cy)}
@@ -49,9 +49,9 @@ canvas#pv{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);widt
 .ok{color:#5fd39a}.no{color:#f0b35a}
 #toast{position:fixed;bottom:calc(var(--th) + 20px);left:50%;transform:translateX(-50%);background:#2a2550;border:1px solid var(--ac);padding:8px 14px;border-radius:8px;display:none;z-index:9}
 ul.st{list-style:none;margin:0;padding:0;display:grid;gap:6px}ul.st li{background:var(--p2);border-radius:6px;padding:7px 9px}
-.gh{position:fixed;z-index:20;background:rgba(139,144,160,.16);transition:background .15s}.gh:hover,.gh.on{background:var(--cy)}
+.gh{position:fixed;z-index:20;touch-action:none;background:rgba(139,144,160,.16);transition:background .15s}.gh.on{background:var(--cy)}@media(hover:hover){.gh:hover{background:var(--cy)}}
 .gl,.gr{top:48px;bottom:var(--th);width:8px;cursor:col-resize}.gl{left:calc(var(--lw) - 4px)}.gr{right:calc(var(--rw) - 4px)}
-.gb{left:0;right:0;bottom:calc(var(--th) - 4px);height:8px;cursor:row-resize}
+.gb{left:0;right:0;bottom:var(--th);height:6px;cursor:row-resize}
 @media(max-width:900px){.gh{display:none}body{grid-template-columns:1fr;grid-template-rows:48px auto auto auto;overflow:auto;height:auto}header,.tl{grid-column:1}aside,section.r{max-height:none}.tl{height:200px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head><body>
@@ -451,7 +451,7 @@ document.addEventListener("keydown",e=>{const tag=document.activeElement.tagName
 const L={lw:330,rw:270,th:300},LD={lw:330,rw:270,th:300};
 try{Object.assign(L,JSON.parse(localStorage.getItem("ksl")||"{}"))}catch(e){}
 function applyL(){const W=innerWidth,Hh=innerHeight;
- L.lw=Math.min(Math.max(L.lw,160),Math.max(160,W-L.rw-320));L.rw=Math.min(Math.max(L.rw,160),Math.max(160,W-L.lw-320));L.th=Math.min(Math.max(L.th,90),Math.max(90,Hh-230));
+ L.lw=Math.min(Math.max(L.lw,160),Math.max(160,W-L.rw-320));L.rw=Math.min(Math.max(L.rw,160),Math.max(160,W-L.lw-320));L.th=Math.min(Math.max(L.th,120),Math.max(120,Hh-230));
  const R=document.documentElement.style;R.setProperty("--lw",L.lw+"px");R.setProperty("--rw",L.rw+"px");R.setProperty("--th",L.th+"px");try{localStorage.setItem("ksl",JSON.stringify(L))}catch(e){}}
 document.querySelectorAll(".gh").forEach(h=>{const k=h.dataset.k;
  h.onpointerdown=e=>{e.preventDefault();h.setPointerCapture(e.pointerId);h.classList.add("on");document.body.style.userSelect="none"};
