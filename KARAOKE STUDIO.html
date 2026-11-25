@@ -52,6 +52,7 @@ ul.st{list-style:none;margin:0;padding:0;display:grid;gap:6px}ul.st li{backgroun
 .gh{position:fixed;z-index:20;touch-action:none;background:rgba(139,144,160,.16);transition:background .15s}.gh.on{background:var(--cy)}@media(hover:hover){.gh:hover{background:var(--cy)}}
 .gl,.gr{top:48px;bottom:var(--th);width:8px;cursor:col-resize}.gl{left:calc(var(--lw) - 4px)}.gr{right:calc(var(--rw) - 4px)}
 .gb{left:0;right:0;bottom:var(--th);height:6px;cursor:row-resize}
+#dlg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;place-items:center;z-index:50}#dlg .box{background:var(--p2);border:1px solid var(--ln);border-radius:12px;padding:18px;width:min(480px,92vw);max-height:80vh;overflow:auto;display:grid;gap:8px}#dlg h3{margin:0}#dlg p{margin:0 0 6px;color:var(--mu);font-size:12px}
 @media(max-width:900px){.gh{display:none}body{grid-template-columns:1fr;grid-template-rows:48px auto auto auto;overflow:auto;height:auto}header,.tl{grid-column:1}aside,section.r{max-height:none}.tl{height:200px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head><body>
@@ -135,6 +136,7 @@ ul.st{list-style:none;margin:0;padding:0;display:grid;gap:6px}ul.st li{backgroun
  <div class="tlw"><canvas id="tc"></canvas></div>
 </div>
 <div class="gh gl" data-k="lw" title="ลากเพื่อปรับขนาด · ดับเบิลคลิกเพื่อรีเซ็ต"></div><div class="gh gr" data-k="rw" title="ลากเพื่อปรับขนาด · ดับเบิลคลิกเพื่อรีเซ็ต"></div><div class="gh gb" data-k="th" title="ลากเพื่อปรับขนาด · ดับเบิลคลิกเพื่อรีเซ็ต"></div>
+<div id="dlg"></div>
 <div id="toast"></div>
 
 <script>
@@ -163,7 +165,7 @@ document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.que
 async function loadFile(f){
  if(!f)return;
  if(!/^(audio|video)\//.test(f.type)&&!/\.(mp3|wav|m4a|aac|flac|ogg|mp4|mov|webm|mkv)$/i.test(f.name)){toast("ไม่รองรับไฟล์นี้: "+f.name);return}
- au.src=URL.createObjectURL(f);S.peaks=null;
+ au.src=URL.createObjectURL(f);S.mfile=f;S.peaks=null;
  $("#minfo").innerHTML="กำลังอ่านไฟล์: "+f.name+" ("+(f.size/1048576).toFixed(1)+" MB)";
  try{
   const ctx=new (window.AudioContext||window.webkitAudioContext)();
@@ -183,10 +185,10 @@ dz.addEventListener("drop",e=>loadFile(e.dataTransfer.files[0]));
 /* background */
 function useVideoBg(url,mute){const v=document.createElement("video");v.src=url;v.muted=true;v.loop=true;v.playsInline=true;S.bgEl=v;S.bgT="video";if(!au.paused)v.play().catch(()=>{})}
 $("#bBgI").onclick=()=>$("#fBgI").click();$("#bBgV").onclick=()=>$("#fBgV").click();
-$("#fBgI").onchange=e=>{const f=e.target.files[0];if(!f)return;const i=new Image();i.onload=()=>{S.bgEl=i;S.bgT="img"};i.onerror=()=>toast("เปิดรูปไม่ได้");i.src=URL.createObjectURL(f)};
-$("#fBgV").onchange=e=>{const f=e.target.files[0];if(f)useVideoBg(URL.createObjectURL(f))};
-$("#bBgN").onclick=()=>{S.bgEl=null;S.bgT="grad"};
-GR.forEach((g,i)=>{const b=document.createElement("button");b.style.cssText=`height:34px;background:linear-gradient(135deg,${g[0]},${g[1]})`;b.onclick=()=>{S.grad=i;S.bgT="grad";S.bgEl=null};b.setAttribute("aria-label","ไล่สี "+(i+1));$("#grads").append(b)});
+$("#fBgI").onchange=e=>{const f=e.target.files[0];if(!f)return;const i=new Image();i.onload=()=>{S.bgEl=i;S.bgT="img"};i.onerror=()=>toast("เปิดรูปไม่ได้");S.bgFile={f,type:"img"};i.src=URL.createObjectURL(f)};
+$("#fBgV").onchange=e=>{const f=e.target.files[0];if(f){S.bgFile={f,type:"video"};useVideoBg(URL.createObjectURL(f))}};
+$("#bBgN").onclick=()=>{S.bgEl=null;S.bgFile=null;S.bgT="grad"};
+GR.forEach((g,i)=>{const b=document.createElement("button");b.style.cssText=`height:34px;background:linear-gradient(135deg,${g[0]},${g[1]})`;b.onclick=()=>{S.grad=i;S.bgT="grad";S.bgEl=null;S.bgFile=null};b.setAttribute("aria-label","ไล่สี "+(i+1));$("#grads").append(b)});
 
 /* lyrics */
 function renderLines(){
@@ -328,7 +330,7 @@ async function addClip(type,f){
   else{el=document.createElement(type==="video"?"video":"audio");el.preload="auto";el.playsInline=true;if(type==="video")el.muted=true;el.src=url;
    await new Promise((ok,no)=>{el.onloadedmetadata=ok;el.onerror=no});sd=isFinite(el.duration)?el.duration:5}
  }catch(e){return toast("เปิดไฟล์ไม่ได้: "+f.name)}
- EL[id]=el;if(AC&&el.pause)connEl(el);snap();
+ el._f=f;EL[id]=el;if(AC&&el.pause)connEl(el);snap();
  S.clips.push({id,type,name:f.name,s:au.currentTime||0,d:type==="image"?5:sd,in:0,sd,vol:1});S.selc=id;S.sel=-1;save();renderLines();
  toast("เพิ่มคลิปที่ตำแหน่งหัวเล่น ลากเพื่อย้าย ลากขอบเพื่อย่อ/ขยาย")}
 function splitClip(t){const c=clipOf(S.selc);if(!c)return;if(t<=c.s+.05||t>=c.s+c.d-.05)return toast("เลื่อนหัวเล่นให้อยู่กลางคลิปที่เลือกก่อน");
@@ -430,8 +432,33 @@ const proj=()=>JSON.stringify({v:1,name:$("#pname").value,lines:S.lines,st:S.st,
 function save(){commit();try{localStorage.setItem("ksai",proj())}catch(e){}}
 function load(j){const p=JSON.parse(j);S.lines=p.lines||[];Object.assign(S.st,p.st||{});S.phOn=!!p.phOn;S.grad=p.grad||0;$("#pname").value=p.name||"โปรเจกต์";syncCtl();renderLines();snap();commit()}
 $("#bUn").onclick=()=>undoDo();$("#bRe").onclick=()=>redoDo();
-$("#bSave").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([proj()],{type:"application/json"}));a.download=$("#pname").value+".karaoke.json";a.click();toast("บันทึกไฟล์โปรเจกต์แล้ว (ไม่รวมไฟล์เพลงและพื้นหลัง ต้องนำเข้าใหม่)")};
-$("#bOpen").onclick=()=>$("#fOpen").click();
+/* project save/open */
+function dlg(html){const d=$("#dlg");d.innerHTML='<div class="box">'+html+'<div style="text-align:right;margin-top:6px"><button id="dx">ปิด</button></div></div>';d.style.display="grid";$("#dx").onclick=()=>d.style.display="none";d.onclick=e=>{if(e.target===d)d.style.display="none"}}
+const closeDlg=()=>$("#dlg").style.display="none";
+const DB=()=>new Promise((ok,no)=>{const r=indexedDB.open("kstudio-db",1);r.onupgradeneeded=()=>r.result.createObjectStore("p");r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
+async function dbPut(k,v){const d=await DB();return new Promise((ok,no)=>{const t=d.transaction("p","readwrite");t.objectStore("p").put(v,k);t.oncomplete=ok;t.onerror=()=>no(t.error)})}
+async function dbDel(k){const d=await DB();return new Promise((ok,no)=>{const t=d.transaction("p","readwrite");t.objectStore("p").delete(k);t.oncomplete=ok;t.onerror=()=>no(t.error)})}
+async function dbList(){const d=await DB();return new Promise((ok,no)=>{const r=d.transaction("p").objectStore("p").getAll();r.onsuccess=()=>ok(r.result.sort((a,b)=>b.saved-a.saved));r.onerror=()=>no(r.error)})}
+async function saveBrowser(){const name=$("#pname").value||"โปรเจกต์";
+ try{await dbPut("p:"+name,{name,saved:Date.now(),json:proj(),main:S.mfile||null,bg:S.bgFile||null,clips:S.clips.map(c=>({m:c,f:(EL[c.id]&&EL[c.id]._f)||null}))});toast("เก็บในเบราว์เซอร์แล้ว: "+name+" (รวมไฟล์เพลงและสื่อ)")}
+ catch(e){toast("เก็บในเบราว์เซอร์ไม่สำเร็จ: "+e.message)}}
+async function saveFile(ask){const data=proj(),nm=($("#pname").value||"karaoke")+".karaoke.json";
+ if(window.showSaveFilePicker){try{if(ask||!S.fh)S.fh=await showSaveFilePicker({suggestedName:nm,types:[{description:"Karaoke project",accept:{"application/json":[".json"]}}]});const w=await S.fh.createWritable();await w.write(data);await w.close();toast("บันทึกไฟล์แล้ว: "+S.fh.name);return}catch(e){if(e.name==="AbortError")return}}
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download=nm;a.click();toast("ดาวน์โหลดไฟล์โปรเจกต์แล้ว ดูได้ในโฟลเดอร์ดาวน์โหลดของเครื่อง")}
+function bgFromFile(f,ty){const u=URL.createObjectURL(f);if(ty==="img"){const i=new Image();i.onload=()=>{S.bgEl=i;S.bgT="img"};i.src=u}else useVideoBg(u)}
+async function restoreClip(m,f){const url=URL.createObjectURL(f);let el;
+ if(m.type==="image"){el=new Image();await new Promise((ok,no)=>{el.onload=ok;el.onerror=no;el.src=url})}
+ else{el=document.createElement(m.type==="video"?"video":"audio");el.preload="auto";el.playsInline=true;if(m.type==="video")el.muted=true;el.src=url;await new Promise((ok,no)=>{el.onloadedmetadata=ok;el.onerror=no})}
+ el._f=f;EL[m.id]=el;if(AC&&el.pause)connEl(el);S.clips.push(m)}
+async function openRec(r){try{load(r.json);S.clips=[];S.selc=null;if(r.main)await loadFile(r.main);if(r.bg){S.bgFile=r.bg;bgFromFile(r.bg.f,r.bg.type)}
+ for(const x of r.clips)if(x.f)await restoreClip(x.m,x.f);save();toast("เปิดโปรเจกต์แล้ว พร้อมไฟล์เพลงและสื่อ")}catch(e){toast("เปิดไม่สำเร็จ: "+e.message)}}
+$("#bSave").onclick=()=>{dlg('<h3>บันทึกโปรเจกต์</h3><button id="s1" class="pri">บันทึกเป็นไฟล์ในเครื่อง (เลือกที่เก็บ)</button><p>ไฟล์ .json เก็บเนื้อเพลง เวลา และสไตล์ ไม่รวมไฟล์เพลง/วิดีโอ/รูป ใช้ Chrome หรือ Edge บนคอมพิวเตอร์เพื่อเลือกโฟลเดอร์ได้ ส่วน Safari/มือถือจะดาวน์โหลดลงโฟลเดอร์ดาวน์โหลด</p><button id="s2" class="pri">เก็บในเบราว์เซอร์ (รวมไฟล์เพลงและสื่อ)</button><p>เปิดกลับมาได้ทันทีโดยไม่ต้องนำเข้าใหม่ เก็บได้เฉพาะในเบราว์เซอร์และเว็บไซต์นี้ ล้างข้อมูลเว็บแล้วจะหาย ชื่อโปรเจกต์เดิมจะถูกเขียนทับ</p>');
+ $("#s1").onclick=()=>{closeDlg();saveFile(true)};$("#s2").onclick=async()=>{closeDlg();await saveBrowser()}};
+$("#bOpen").onclick=async()=>{let ks=[],er="";try{ks=await dbList()}catch(e){er=e.message}
+ dlg('<h3>เปิดโปรเจกต์</h3><button id="o1" class="pri">เปิดจากไฟล์ .json</button><h4>ที่เก็บไว้ในเบราว์เซอร์</h4><div id="ol"></div>');
+ $("#o1").onclick=()=>{closeDlg();$("#fOpen").click()};const ol=$("#ol");
+ if(er)ol.innerHTML='<p>อ่านที่เก็บในเบราว์เซอร์ไม่ได้ ('+er+')</p>';else if(!ks.length)ol.innerHTML='<p>ยังไม่มีโปรเจกต์ที่เก็บไว้</p>';
+ ks.forEach(r=>{const d=document.createElement("div");d.className="row";d.style.margin="4px 0";d.innerHTML='<span></span><button class="op pri">เปิด</button><button class="dd">ลบ</button>';d.firstChild.textContent=r.name+" · "+new Date(r.saved).toLocaleString("th-TH");d.querySelector(".op").onclick=()=>{closeDlg();openRec(r)};d.querySelector(".dd").onclick=async()=>{await dbDel("p:"+r.name);d.remove()};ol.append(d)})};
 $("#fOpen").onchange=async e=>{try{load(await e.target.files[0].text());toast("เปิดโปรเจกต์แล้ว นำเข้าเพลงอีกครั้งเพื่อเล่น")}catch(x){toast("ไฟล์โปรเจกต์ไม่ถูกต้อง")}};
 $("#bNew").onclick=()=>{snap();S.clips=[];S.selc=null;S.lines=[];S.sel=-1;S.phOn=false;$("#pname").value="โปรเจกต์ใหม่";syncCtl();renderLines();save();toast("เริ่มโปรเจกต์ใหม่แล้ว",1)};
 document.addEventListener("keydown",e=>{const tag=document.activeElement.tagName;
